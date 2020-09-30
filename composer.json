@@ -1,0 +1,22 @@
+{
+    "name": "mordilion/huffman-php",
+    "description": "PHP-Library for using the Huffman-Algorithm in PHP",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Henning Huncke",
+            "email": "mordilion@gmx.de"
+        }
+    ],
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "^9.0",
+        "vimeo/psalm": "^3.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "Mordilion\\HuffmanPHP\\": "src/Mordilion/HuffmanPHP"
+        }
+    }
+}
