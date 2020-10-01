@@ -14,38 +14,29 @@ class DictionaryTest extends TestCase
     public function testDictionaryHasTheCorrectSortedValues(): void
     {
         $values = [
-            'a',
-            'a',
-            'a',
-            'a',
-            'ab',
-            'ab',
-            'b',
-            'b',
-            'b',
-            'abc',
-            'c',
-            'c',
-            'd',
+            'aaaaaaaaaaaaaaa',
+            'bbbbbbb',
+            'cccccc',
+            'dddddd',
+            'eeeee'
         ];
 
         $dictionary = new Dictionary($values);
         $dictionaryValues = $dictionary->getValues();
 
-        self::assertEquals(0, bindec($dictionaryValues['a']));
-        self::assertEquals(1, bindec($dictionaryValues['d']));
-        self::assertEquals(2, bindec($dictionaryValues['c']));
-        self::assertEquals(3, bindec($dictionaryValues['b']));
+        self::assertEquals('0', $dictionaryValues['a']);
+        self::assertEquals('111', $dictionaryValues['b']);
+        self::assertEquals('101', $dictionaryValues['c']);
+        self::assertEquals('110', $dictionaryValues['d']);
+        self::assertEquals('100', $dictionaryValues['e']);
 
         $dictionary = new Dictionary($values, Dictionary::MAX_LENGTH_WHOLE_WORDS);
         $dictionaryValues = $dictionary->getValues();
-        var_dump($dictionaryValues);
 
-        self::assertEquals(0, bindec($dictionaryValues['a']));
-        self::assertEquals(1, bindec($dictionaryValues['d']));
-        self::assertEquals(2, bindec($dictionaryValues['c']));
-        self::assertEquals(3, bindec($dictionaryValues['b']));
-        self::assertEquals(4, bindec($dictionaryValues['ab']));
-        self::assertEquals(5, bindec($dictionaryValues['abc']));
+        self::assertEquals('110', $dictionaryValues['aaaaaaaaaaaaaaa']);
+        self::assertEquals('111', $dictionaryValues['bbbbbbb']);
+        self::assertEquals('00', $dictionaryValues['cccccc']);
+        self::assertEquals('01', $dictionaryValues['dddddd']);
+        self::assertEquals('10', $dictionaryValues['eeeee']);
     }
 }

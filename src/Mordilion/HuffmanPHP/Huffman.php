@@ -73,6 +73,10 @@ class Huffman
 
     public function encode(string $decoded, bool $compress = false): string
     {
+        if ($decoded === '') {
+            return '';
+        }
+
         $encoded = '';
         $length = strlen($decoded);
         $count = $this->dictionary->getMaxBinaryLength();

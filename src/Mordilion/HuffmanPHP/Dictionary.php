@@ -123,8 +123,10 @@ class Dictionary
 
         foreach ($values as $value) {
             if ($this->maxLength === self::MAX_LENGTH_WHOLE_WORDS) {
-                $occurrences[$value] = (int) ($occurrences[$value] ?? 0) + 1;
-                continue;
+                $occurrences[$value] = [
+                    'count' => (int) ($occurrences[$value]['count'] ?? 0) + 1,
+                    'value' => $value,
+                ];
             }
 
             $length = strlen($value);
@@ -132,25 +134,32 @@ class Dictionary
             for ($j = $this->maxLength; $j > 0; $j--) {
                 $substrLength = $j;
 
-                for ($i = 0; $i < $length; $i += $substrLength) {
-                    $substr = substr($value, $i, $substrLength);
-                    $occurrences[$substr] = substr_count($value, $substr) + (int) ($occurrences[$substr] ?? 0);
+                for ($i = 0; $i < $length; $i++) {
+                    $substr = substr($value, 0, $substrLength);
+                    $occurrences[$substr] = [
+                        'count' => substr_count($value, $substr),
+                        'value' => $substr,
+                    ];
                 }
             }
         }
 
-        asort($occurrences);
-        $occurrences = array_keys($occurrences);
+        ksort($occurrences);
+        $this->sortByCount($occurrences);
 
         while (count($occurrences) > 1) {
             $row1 = array_shift($occurrences);
             $row2 = array_shift($occurrences);
 
-            $occurrences[] = [$row1, $row2];
-            sort($occurrences);
+            $occurrences[] = [
+                'count' => (int) $row1['count'] + (int) $row2['count'],
+                'value' => [$row1, $row2],
+            ];
+
+            $this->sortByCount($occurrences);
         }
 
-        $this->occurrences = $occurrences;
+        $this->occurrences = (array) (reset($occurrences)['value'] ?? []);
     }
 
     private function fill($data, $value = ''): void
@@ -162,12 +171,19 @@ class Dictionary
         }
 
         if (is_array($data)) {
-            $this->fill($data[0] ?? null, $value . '0');
-            $this->fill($data[1] ?? null, $value . '1');
+            $this->fill($data[0]['value'] ?? null, $value . '0');
+            $this->fill($data[1]['value'] ?? null, $value . '1');
 
             return;
         }
 
         $this->dictionary[$data] = $value;
+    }
+
+    private function sortByCount(array &$occurrences): void
+    {
+        usort($occurrences, static function (array $left, array $right) {
+            return (int) $left['count'] <=> (int) $right['count'];
+        });
     }
 }
