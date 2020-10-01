@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Mordilion\HuffmanPHP\Dictionary;
-use Mordilion\HuffmanPHP\Huffman;
+use HuffmanPHP\Dictionary;
+use HuffmanPHP\Huffman;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 

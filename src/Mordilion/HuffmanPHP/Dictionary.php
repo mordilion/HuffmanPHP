@@ -20,7 +20,7 @@ use InvalidArgumentException;
  */
 class Dictionary
 {
-    public const MAX_LENGTH_WHOLE_WORDS = -1;
+    public const MAX_LENGTH_WHOLE_WORDS = 0;
 
     /**
      * @var array
@@ -47,10 +47,10 @@ class Dictionary
      */
     private $version;
 
-    public function __construct(array $values, int $maxLength, int $version = 0)
+    public function __construct(array $values, int $maxLength = 1, int $version = 0)
     {
         if ($maxLength < self::MAX_LENGTH_WHOLE_WORDS) {
-            throw new InvalidArgumentException('Parameter $maxLength ,ust be greater than -1');
+            throw new InvalidArgumentException('Parameter $maxLength must be greater than ' . self::MAX_LENGTH_WHOLE_WORDS);
         }
 
         $this->maxLength = $maxLength;
@@ -123,7 +123,7 @@ class Dictionary
 
         foreach ($values as $value) {
             if ($this->maxLength === self::MAX_LENGTH_WHOLE_WORDS) {
-                $occurrences[$value] = 1;
+                $occurrences[$value] = (int) ($occurrences[$value] ?? 0) + 1;
                 continue;
             }
 
@@ -139,7 +139,7 @@ class Dictionary
             }
         }
 
-        arsort($occurrences);
+        asort($occurrences);
         $occurrences = array_keys($occurrences);
 
         while (count($occurrences) > 1) {
