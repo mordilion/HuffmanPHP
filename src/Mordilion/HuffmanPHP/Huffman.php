@@ -64,7 +64,7 @@ class Huffman
 
         for ($i = 0; $i < $length; $i += $count) {
             $binary = substr($encoded, $i, $count);
-            $key = $this->dictionary->getKeyByDecimal(bindec($binary));
+            $key = $this->dictionary->getKeyByDecimal((int) bindec($binary));
             $decoded .= $key;
         }
 
@@ -106,7 +106,7 @@ class Huffman
         $number = [];
 
         for ($i = 0; $i < $length; $i++) {
-            $number[$i] = strpos($inputBase, $input[$i]);
+            $number[$i] = (int) strpos($inputBase, $input[$i]);
         }
 
         do {

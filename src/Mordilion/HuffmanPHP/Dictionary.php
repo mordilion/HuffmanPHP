@@ -109,7 +109,7 @@ class Dictionary
     public function getKeyByDecimal(int $decimal)
     {
         foreach ($this->dictionary as $key => $value) {
-            if (bindec($value) === $decimal) {
+            if ((int) bindec($value) === $decimal) {
                 return $key;
             }
         }
@@ -162,7 +162,10 @@ class Dictionary
         $this->occurrences = (array) (reset($occurrences)['value'] ?? []);
     }
 
-    private function fill($data, $value = ''): void
+    /**
+     * @param null|array|string|int $data
+     */
+    private function fill($data, string $value = ''): void
     {
         $this->maxBinaryLength = max(strlen($value), $this->maxBinaryLength);
 
