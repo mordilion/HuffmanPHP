@@ -18,17 +18,15 @@ class DictionaryTest extends TestCase
             'a',
             'a',
             'a',
-            'bcddddd',
-            'b',
-            'b',
-            'b',
-            'caaaaaa',
-            'c',
-            'c',
-            'abc',
             'ab',
+            'ab',
+            'b',
+            'b',
+            'b',
+            'abc',
+            'c',
+            'c',
             'd',
-            'baaaaaa',
         ];
 
         $dictionary = new Dictionary($values);
@@ -47,5 +45,7 @@ class DictionaryTest extends TestCase
         self::assertEquals(1, bindec($dictionaryValues['d']));
         self::assertEquals(2, bindec($dictionaryValues['c']));
         self::assertEquals(3, bindec($dictionaryValues['b']));
+        self::assertEquals(4, bindec($dictionaryValues['ab']));
+        self::assertEquals(5, bindec($dictionaryValues['abc']));
     }
 }
