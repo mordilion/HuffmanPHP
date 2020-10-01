@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use HuffmanPHP\Dictionary;
-use HuffmanPHP\Huffman;
+use Mordilion\HuffmanPHP\Dictionary;
+use Mordilion\HuffmanPHP\Huffman;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -27,6 +27,7 @@ $values = array_merge(
         'iflat',
         'iflat_def',
         'iflat_opt',
+        'highspeed_opt',
         'kag',
         'kvk',
         'gigacube',
@@ -48,7 +49,7 @@ $values = array_merge(
 $dict = new Dictionary($values, Dictionary::MAX_LENGTH_WHOLE_WORDS, 1);
 $huff = new Huffman($dict);
 
-$value = '808786|ag-allflat_def-galaxy_s10-gg_z-iflat_def-rnp_total-smsflat_def-vk|color-black_memorysize-128gb';
+$value = '809242|ag1-allflat_def-eag-gg_z-iflat_def-kvk-rnp_total-smsflat_def-triplesim|base';
 $encoded = $huff->encode($value, true);
 
 echo 'Original: (' . strlen($value) . ') ' . $value . PHP_EOL;
@@ -58,4 +59,5 @@ echo 'Encoded: (' . strlen($encoded) . ') ' . $encoded . PHP_EOL;
 $decoded = $huff->decode($encoded, true);
 
 echo 'Decoded: (' . strlen($decoded) . ') ' . $decoded . PHP_EOL;
+print_r($dict->getValues());
 
