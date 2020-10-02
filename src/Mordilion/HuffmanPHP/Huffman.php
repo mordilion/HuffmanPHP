@@ -157,7 +157,7 @@ class Huffman
             $substr = substr($decoded, $index, $i);
             $binary = $this->dictionary->getBinary($substr);
 
-            if (!empty($binary)) {
+            if ($binary !== null) {
                 return [$i, $binary];
             }
         }

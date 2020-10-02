@@ -39,4 +39,14 @@ class DictionaryTest extends TestCase
         self::assertEquals('01', $dictionaryValues['dddddd']);
         self::assertEquals('10', $dictionaryValues['eeeee']);
     }
+
+    public function testDictionaryHasTheCorrectSortedValuesWithSingleValue()
+    {
+        $dictionary = new Dictionary(['aaabbcc'], 1, 1);
+        $dictionaryValues = $dictionary->getValues();
+
+        self::assertEquals('0', $dictionaryValues['a']);
+        self::assertEquals('11', $dictionaryValues['b']);
+        self::assertEquals('10', $dictionaryValues['c']);
+    }
 }

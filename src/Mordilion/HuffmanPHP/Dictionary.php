@@ -135,7 +135,7 @@ class Dictionary
                 $substrLength = $j;
 
                 for ($i = 0; $i < $length; $i++) {
-                    $substr = substr($value, 0, $substrLength);
+                    $substr = substr($value, $i, $substrLength);
                     $occurrences[$substr] = [
                         'count' => substr_count($value, $substr),
                         'value' => $substr,
