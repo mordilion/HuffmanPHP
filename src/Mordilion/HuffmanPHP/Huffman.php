@@ -20,7 +20,7 @@ use RuntimeException;
  */
 class Huffman
 {
-    private const BASE_MAX = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_|~^';
+    private const BASE_MAX = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_~';
 
     /**
      * @var Dictionary
