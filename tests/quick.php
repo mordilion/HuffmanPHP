@@ -10,46 +10,19 @@ require_once __DIR__ . '/../vendor/autoload.php';
 $values = array_merge(
     str_split('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_|'),
     [
-        'ag',
-        'allflat',
-        'allflat_def',
-        'allflat_opt',
-        'allflat_sms_opt',
-        'cb',
-        'comflat',
-        'comflat_def',
-        'comflat_opt',
-        'esim',
-        'gg',
-        'gg_omvlz',
-        'gg_z',
-        'ggv',
-        'iflat',
-        'iflat_def',
-        'iflat_opt',
-        'highspeed_opt',
-        'kag',
-        'kvk',
-        'gigacube',
-        'rnpbonus',
-        'rnp_total',
-        'sgh_total',
-        'smsflat',
-        'smsflat_def',
-        'smsflat_opt',
-        'startpak',
-        'triplesim',
-        'min_sms_pak_def',
-        'min_sms_pak_opt',
-        'base',
-        'vk',
+        'alpha',
+        'beta',
+        'cesar',
+        'delta',
+        'and',
+        'or',
     ]
 );
 
 $dict = new Dictionary($values, Dictionary::MAX_LENGTH_WHOLE_WORDS, 1);
 $huff = new Huffman($dict);
 
-$value = '809242|ag1-allflat_def-eag-gg_z-iflat_def-kvk-rnp_total-smsflat_def-triplesim|base';
+$value = 'alpha-and-beta-or-alpha-and-cesar-or-beta-and-delta';
 $encoded = $huff->encode($value, true);
 
 echo 'Original: (' . strlen($value) . ') ' . $value . PHP_EOL;
@@ -59,5 +32,4 @@ echo 'Encoded: (' . strlen($encoded) . ') ' . $encoded . PHP_EOL;
 $decoded = $huff->decode($encoded, true);
 
 echo 'Decoded: (' . strlen($decoded) . ') ' . $decoded . PHP_EOL;
-print_r($dict->getValues());
 
