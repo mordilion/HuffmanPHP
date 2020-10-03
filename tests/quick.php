@@ -16,10 +16,11 @@ $values = array_merge(
         'delta',
         'and',
         'or',
+        '-'
     ]
 );
 
-$dict = new Dictionary($values, Dictionary::MAX_LENGTH_WHOLE_WORDS, 1);
+$dict = new Dictionary($values, Dictionary::MAX_LENGTH_WHOLE_WORDS);
 $huff = new Huffman($dict);
 
 $value = 'alpha-and-beta-or-alpha-and-cesar-or-beta-and-delta';

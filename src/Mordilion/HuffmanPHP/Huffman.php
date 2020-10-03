@@ -38,34 +38,23 @@ class Huffman
             return '';
         }
 
-        $decoded = '';
-        $count = $this->dictionary->getMaxBinaryLength();
-        $version = $this->dictionary->getVersion();
-        $encodedVersion = 0;
-
         if ($compressed) {
             $encoded = $this->convertBase($encoded, self::BASE_MAX, '01');
         }
 
-        if (strlen($encoded) % $count !== 0) {
-            $encoded = str_pad($encoded, strlen($encoded) + ($count - (strlen($encoded) % $count)), '0', STR_PAD_LEFT);
-        }
-
-        if ($version > 0) {
-            $encodedVersion = bindec(substr($encoded, 0, $count));
-            $encoded = substr($encoded, $count);
-        }
-
+        $decoded = '';
         $length = strlen($encoded);
 
-        if ($encodedVersion !== $version) {
-            throw new RuntimeException(sprintf('Wrong version (dict: %d, enc: %d)', $version, $encodedVersion));
-        }
-
         for ($i = 0; $i < $length; $i += $count) {
-            $binary = substr($encoded, $i, $count);
-            $key = $this->dictionary->getKeyByDecimal((int) bindec($binary));
-            $decoded .= $key;
+            $key = false;
+            $count = 0;
+
+            while ($key === false && $count <= $length - $i) {
+                $binary = substr($encoded, $i, ++$count);
+                $key = $this->dictionary->getKey($binary);
+            }
+
+            $decoded .= $key !== false ? $key : '';
         }
 
         return $decoded;
@@ -79,21 +68,18 @@ class Huffman
 
         $encoded = '';
         $length = strlen($decoded);
-        $count = $this->dictionary->getMaxBinaryLength();
 
         for ($i = 0; $i < $length; $i++) {
             [$inc, $binary] = $this->getBestBinary($decoded, $i);
-            $encoded .= str_pad($binary, $count, '0', STR_PAD_LEFT);
+            $encoded .= $binary;
             $i += $inc - 1;
         }
 
-        $version = str_pad(decbin($this->dictionary->getVersion()), $count, '0', STR_PAD_LEFT);
-
         if ($compress) {
-            return $this->convertBase($version . $encoded, '01', self::BASE_MAX);
+            return $this->convertBase($encoded, '01', self::BASE_MAX);
         }
 
-        return $version . $encoded;
+        return $encoded;
     }
 
     private function convertBase(string $input, string $inputBase, string $outputBase): string

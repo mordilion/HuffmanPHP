@@ -30,24 +30,14 @@ class Dictionary
     /**
      * @var int
      */
-    private $maxBinaryLength = 0;
-
-    /**
-     * @var int
-     */
-    private $maxLength = 1;
+    private $maxLength;
 
     /**
      * @var array
      */
     private $occurrences = [];
 
-    /**
-     * @var int
-     */
-    private $version;
-
-    public function __construct(array $values, int $maxLength = 1, int $version = 0)
+    public function __construct(array $values, int $maxLength = 1)
     {
         if ($maxLength < self::MAX_LENGTH_WHOLE_WORDS) {
             throw new InvalidArgumentException('Parameter $maxLength must be greater than ' . self::MAX_LENGTH_WHOLE_WORDS);
@@ -60,8 +50,6 @@ class Dictionary
 
         $keys = array_map('strlen', array_keys($this->dictionary));
         array_multisort($keys, SORT_DESC, $this->dictionary);
-
-        $this->version = $version;
     }
 
     public function getBinary(string $key): ?string
@@ -74,47 +62,17 @@ class Dictionary
         return $this->dictionary;
     }
 
-    public function getMaxBinaryLength(): int
-    {
-        return $this->maxBinaryLength;
-    }
-
     public function getMaxLength(): int
     {
         return $this->maxLength;
     }
 
-    public function getVersion(): int
-    {
-        return $this->version;
-    }
-
     /**
-     * @return int|string
+     * @return false|int|string
      */
     public function getKey(string $binary)
     {
-        foreach ($this->dictionary as $key => $value) {
-            if (str_pad($binary, strlen($value), '0', STR_PAD_LEFT) === $value) {
-                return $key;
-            }
-        }
-
-        return '';
-    }
-
-    /**
-     * @return int|string
-     */
-    public function getKeyByDecimal(int $decimal)
-    {
-        foreach ($this->dictionary as $key => $value) {
-            if ((int) bindec($value) === $decimal) {
-                return $key;
-            }
-        }
-
-        return '';
+        return array_search($binary, $this->dictionary, true);
     }
 
     private function calculateOccurrences(array $values): void
@@ -167,8 +125,6 @@ class Dictionary
      */
     private function fill($data, string $value = ''): void
     {
-        $this->maxBinaryLength = max(strlen($value), $this->maxBinaryLength);
-
         if ($data === null) {
             return;
         }
