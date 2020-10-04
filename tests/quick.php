@@ -6,9 +6,8 @@ use Mordilion\HuffmanPHP\Dictionary;
 use Mordilion\HuffmanPHP\Huffman;
 
 require_once __DIR__ . '/../vendor/autoload.php';
-
 $values = array_merge(
-    str_split('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_|'),
+    str_split('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_'), // fallback solution
     [
         'alpha',
         'beta',
