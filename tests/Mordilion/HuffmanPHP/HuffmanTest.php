@@ -11,9 +11,25 @@ use PHPUnit\Framework\TestCase;
  */
 class HuffmanTest extends TestCase
 {
-    public function testSuccessDecodingWithSameDictionaryVersion()
+    public function testSuccessSimpleDecodingWithMaxLengthOfOne()
     {
-        $dictionary = new Dictionary(['aaabbcc'], 1, 1);
+        $dictionary = new Dictionary(['aaabbcc'], 1);
+        $huffman = new Huffman($dictionary);
+
+        $original = 'aaaaaaaaaabbcc';
+        $encoded = $huffman->encode($original);
+
+        self::assertEquals($original, $huffman->decode($encoded));
+    }
+
+    public function testSuccessDecodingWithMaxLengthOfSixteenWithMultipleValues()
+    {
+        $dictionary = new Dictionary([
+            'aaabbcc',
+            'aaaaaaaaaaaaaaaaaaaaabbbbbbbbcccccccc',
+            'ddddddddd',
+            'aaaaabc',
+        ], 16);
         $huffman = new Huffman($dictionary);
 
         $original = 'aaaaaaaaaabbcc';

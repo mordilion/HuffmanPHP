@@ -42,7 +42,7 @@ class DictionaryTest extends TestCase
 
     public function testDictionaryHasTheCorrectSortedValuesWithSingleValue()
     {
-        $dictionary = new Dictionary(['aaabbcc'], 1, 1);
+        $dictionary = new Dictionary(['aaabbcc'], 1);
         $dictionaryValues = $dictionary->getValues();
 
         self::assertEquals('0', $dictionaryValues['a']);
