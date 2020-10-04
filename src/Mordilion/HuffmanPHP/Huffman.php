@@ -27,11 +27,22 @@ class Huffman
      */
     private $dictionary;
 
+    /**
+     * Huffman constructor.
+     *
+     * @param Dictionary $dictionary
+     */
     public function __construct(Dictionary $dictionary)
     {
         $this->dictionary = $dictionary;
     }
 
+    /**
+     * @param string $encoded
+     * @param bool   $compressed
+     *
+     * @return string
+     */
     public function decode(string $encoded, bool $compressed = false): string
     {
         if ($encoded === '') {
@@ -51,7 +62,7 @@ class Huffman
 
             while ($key === false && $count <= $length - $i) {
                 $binary = substr($encoded, $i, ++$count);
-                $key = $this->dictionary->getKey($binary);
+                $key = $this->dictionary->getValue($binary);
             }
 
             $decoded .= $key !== false ? $key : '';
@@ -60,6 +71,12 @@ class Huffman
         return $decoded;
     }
 
+    /**
+     * @param string $decoded
+     * @param bool   $compress
+     *
+     * @return string
+     */
     public function encode(string $decoded, bool $compress = false): string
     {
         if ($decoded === '') {
@@ -82,17 +99,29 @@ class Huffman
         return $encoded;
     }
 
+    /**
+     * @param string $input
+     * @param string $inputBase
+     * @param string $outputBase
+     *
+     * @return string
+     */
     private function convertBase(string $input, string $inputBase, string $outputBase): string
     {
+        $converted = '';
         $inputBaseLength = strlen($inputBase);
         $outputBaseLength = strlen($outputBase);
-
         $length = strlen($input);
-        $result = '';
-        $number = [];
+        $numbers = [];
 
         for ($i = 0; $i < $length; $i++) {
-            $number[$i] = (int) strpos($inputBase, $input[$i]);
+            $position = strpos($inputBase, $input[$i]);
+
+            if ($position === false) {
+                throw new RuntimeException('Input does not match the base');
+            }
+
+            $numbers[$i] = $position;
         }
 
         do {
@@ -100,26 +129,32 @@ class Huffman
             $newLength = 0;
 
             for ($i = 0; $i < $length; $i++) {
-                $divide = $divide * $inputBaseLength + $number[$i];
+                $divide = $divide * $inputBaseLength + $numbers[$i];
 
                 if ($divide >= $outputBaseLength) {
-                    $number[$newLength++] = (int) ($divide / $outputBaseLength);
+                    $numbers[$newLength++] = (int) ($divide / $outputBaseLength);
                     $divide %= $outputBaseLength;
                     continue;
                 }
 
                 if ($newLength > 0) {
-                    $number[$newLength++] = 0;
+                    $numbers[$newLength++] = 0;
                 }
             }
 
             $length = $newLength;
-            $result = $outputBase[$divide] . $result;
+            $converted = $outputBase[$divide] . $converted;
         } while ($newLength !== 0);
 
-        return $result;
+        return $converted;
     }
 
+    /**
+     * @param string $decoded
+     * @param int    $index
+     *
+     * @return array
+     */
     private function getBestBinary(string $decoded, int $index): array
     {
         $maxLength = $this->dictionary->getMaxLength();
