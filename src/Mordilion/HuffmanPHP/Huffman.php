@@ -20,6 +20,9 @@ use RuntimeException;
  */
 class Huffman
 {
+    private const BASE_MAX = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_~';
+    private const BASE_BINARY = '10';
+
     /**
      * @var Dictionary
      */
@@ -48,7 +51,7 @@ class Huffman
         }
 
         if ($compressed) {
-            $encoded = gzinflate(base64_decode($encoded));
+            $encoded = $this->convertBase($encoded, self::BASE_MAX, self::BASE_BINARY);
         }
 
         $decoded = '';
@@ -91,10 +94,62 @@ class Huffman
         }
 
         if ($compress) {
-            return base64_encode(gzdeflate($encoded));
+            return $this->convertBase($encoded, self::BASE_BINARY, self::BASE_MAX);
         }
 
         return $encoded;
+    }
+
+    /**
+     * @param string $input
+     * @param string $inputBase
+     * @param string $outputBase
+     *
+     * @return string
+     */
+    private function convertBase(string $input, string $inputBase, string $outputBase): string
+    {
+        $inputBase = chr(0) . $inputBase; // needs to be added to prevent using the 0 index
+        $outputBase = chr(0) . $outputBase;
+        $converted = '';
+        $inputBaseLength = strlen($inputBase);
+        $outputBaseLength = strlen($outputBase);
+        $length = strlen($input);
+        $numbers = [];
+
+        for ($i = 0; $i < $length; $i++) {
+            $position = strpos($inputBase, $input[$i]);
+
+            if ($position === false) {
+                throw new RuntimeException('Input does not match the base');
+            }
+
+            $numbers[$i] = $position;
+        }
+
+        do {
+            $divide = 0;
+            $newLength = 0;
+
+            for ($i = 0; $i < $length; $i++) {
+                $divide = ($divide * $inputBaseLength) + $numbers[$i];
+
+                if ($divide >= $outputBaseLength) {
+                    $numbers[$newLength++] = (int) ($divide / $outputBaseLength);
+                    $divide %= $outputBaseLength;
+                    continue;
+                }
+
+                if ($newLength > 0) {
+                    $numbers[$newLength++] = 0;
+                }
+            }
+
+            $length = $newLength;
+            $converted = $outputBase[$divide] . $converted;
+        } while ($newLength !== 0);
+
+        return $converted;
     }
 
     /**
