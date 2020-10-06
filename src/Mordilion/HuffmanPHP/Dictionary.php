@@ -97,6 +97,14 @@ class Dictionary
     /**
      * @param array $values
      */
+    public function setValues(array $values): void
+    {
+        $this->values = $values;
+    }
+
+    /**
+     * @param array $values
+     */
     private function calculateOccurrences(array $values): void
     {
         $occurrences = [];
