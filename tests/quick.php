@@ -21,8 +21,8 @@ $values = array_merge(
 
 $dict = new Dictionary($values, Dictionary::MAX_LENGTH_WHOLE_WORDS);
 $huff = new Huffman($dict);
-
-$value = 'alpha-and-beta-or-alpha-and-cesar-or-beta-and-delta';
+$value = 'and';
+$value = 'alpha-and-cesar-or-alpha-or-delta-and-beta';
 $encoded = $huff->encode($value, true);
 
 echo 'Original: (' . strlen($value) . ') ' . $value . PHP_EOL;
