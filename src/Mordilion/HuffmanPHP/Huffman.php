@@ -20,8 +20,8 @@ use RuntimeException;
  */
 class Huffman
 {
-    private const BASE_MAX = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_~';
-    private const BASE_BINARY = '01';
+    private const BASE_MAX = '~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
+    private const BASE_BINARY = '~01';
 
     /**
      * @var Dictionary
@@ -114,7 +114,6 @@ class Huffman
         $outputBaseLength = strlen($outputBase);
         $length = strlen($input);
         $numbers = [];
-        $leadingZeros = 0;
 
         for ($i = 0; $i < $length; $i++) {
             $position = strpos($inputBase, $input[$i]);
@@ -124,7 +123,6 @@ class Huffman
             }
 
             $numbers[$i] = $position;
-            $leadingZeros += $leadingZeros >= $i && $position === 0 ? 1 : 0;
         }
 
         do {
@@ -148,11 +146,6 @@ class Huffman
             $length = $newLength;
             $converted = $outputBase[$divide] . $converted;
         } while ($newLength > 0);
-
-        while ($leadingZeros > 0) {
-            $converted = $outputBase[0] . $converted;
-            $leadingZeros--;
-        }
 
         return $converted;
     }

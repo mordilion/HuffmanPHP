@@ -13,23 +13,33 @@ $values = array_merge(
         'beta',
         'cesar',
         'delta',
+        'gamma',
         'and',
         'or',
-        '-'
     ]
 );
 
 $dict = new Dictionary($values, Dictionary::MAX_LENGTH_WHOLE_WORDS);
 $huff = new Huffman($dict);
-$value = 'and';
-$value = 'alpha-and-cesar-or-alpha-or-delta-and-beta';
-$encoded = $huff->encode($value, true);
 
-echo 'Original: (' . strlen($value) . ') ' . $value . PHP_EOL;
-echo 'Base64: (' . strlen(base64_encode($value)) . ') ' . base64_encode($value) . PHP_EOL;
-echo 'Encoded: (' . strlen($encoded) . ') ' . $encoded . PHP_EOL;
+for ($i = 1; $i <= 10; $i++) {
+    for ($j = 0; $j < count($values); $j++) {
+        $value = implode('', array_slice($values, $j, $i));
 
-$decoded = $huff->decode($encoded, true);
+        $encoded = $huff->encode($value, true);
+        $decoded = $huff->decode($encoded, true);
 
-echo 'Decoded: (' . strlen($decoded) . ') ' . $decoded . PHP_EOL;
+        //if ($decoded !== $value) {
+            echo PHP_EOL;
+            echo 'Original: (' . strlen($value) . ') ' . $value . PHP_EOL;
+            echo 'Encoded: (' . strlen($encoded) . ') ' . $encoded . PHP_EOL;
+            echo 'Decoded: (' . strlen($decoded) . ') ' . $decoded . PHP_EOL;
+            echo PHP_EOL;
+        //}
+    }
+
+    echo '.';
+}
+
+echo PHP_EOL;
 
