@@ -20,8 +20,8 @@ use RuntimeException;
  */
 class Huffman
 {
-    private const BASE_MAX = '~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
-    private const BASE_BINARY = '~01';
+    private const BASE_MAX = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_~';
+    private const BASE_BINARY = '01';
 
     /**
      * @var Dictionary
@@ -51,7 +51,7 @@ class Huffman
         }
 
         if ($compressed) {
-            $encoded = $this->convertBase($encoded, self::BASE_MAX, self::BASE_BINARY);
+            $encoded = substr($this->convertBase($encoded, self::BASE_MAX, self::BASE_BINARY), 1);
         }
 
         $decoded = '';
@@ -94,7 +94,7 @@ class Huffman
         }
 
         if ($compress) {
-            return $this->convertBase($encoded, self::BASE_BINARY, self::BASE_MAX);
+            return $this->convertBase('1'. $encoded, self::BASE_BINARY, self::BASE_MAX);
         }
 
         return $encoded;
