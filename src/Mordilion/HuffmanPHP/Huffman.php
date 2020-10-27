@@ -21,6 +21,7 @@ use RuntimeException;
 class Huffman
 {
     private const BASE_MAX = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_~';
+    private const BASE_DECIMAL = '0123456789';
     private const BASE_BINARY = '01';
 
     /**
@@ -57,7 +58,7 @@ class Huffman
         $decoded = '';
         $length = strlen($encoded);
 
-        for ($i = 0; $i < $length; $i += $count) {
+        for ($i = 0; $i < $length; $i++) {
             $key = false;
             $count = 0;
 
@@ -66,6 +67,7 @@ class Huffman
                 $key = $this->dictionary->getValue($binary);
             }
 
+            $i += $count - 1;
             $decoded .= $key !== false ? $key : '';
         }
 
@@ -102,52 +104,45 @@ class Huffman
 
     /**
      * @param string $input
-     * @param string $inputBase
-     * @param string $outputBase
+     * @param string $inputAlphabet
+     * @param string $outputAlphabet
      *
      * @return string
      */
-    private function convertBase(string $input, string $inputBase, string $outputBase): string
+    private function convertBase(string $input, string $inputAlphabet, string $outputAlphabet): string
     {
-        $converted = '';
-        $inputBaseLength = strlen($inputBase);
-        $outputBaseLength = strlen($outputBase);
-        $length = strlen($input);
-        $numbers = [];
+        if ($outputAlphabet === self::BASE_DECIMAL) {
+            $inputAlphabetLength = (string) strlen($inputAlphabet);
+            $inputLength = strlen($input);
+            $result = (string) strpos($inputAlphabet, $input[0]);
 
-        for ($i = 0; $i < $length; $i++) {
-            $position = strpos($inputBase, $input[$i]);
-
-            if ($position === false) {
-                throw new RuntimeException('Input does not match the base');
+            for ($i = 1; $i < $inputLength; $i++) {
+                $result = bcadd(bcmul($inputAlphabetLength, $result), (string) strpos($inputAlphabet, $input[$i]));
             }
 
-            $numbers[$i] = $position;
+            return $result;
         }
 
-        do {
-            $divide = 0;
-            $newLength = 0;
+        $decimal = $input;
+        $outputAlphabetCharacters = str_split($outputAlphabet, 1);
 
-            for ($i = 0; $i < $length; $i++) {
-                $divide = ($divide * $inputBaseLength) + $numbers[$i];
+        if ($inputAlphabet !== self::BASE_DECIMAL) {
+            $decimal = $this->convertBase($input, $inputAlphabet, self::BASE_DECIMAL);
+        }
 
-                if ($divide >= $outputBaseLength) {
-                    $numbers[$newLength++] = (int) ($divide / $outputBaseLength);
-                    $divide %= $outputBaseLength;
-                    continue;
-                }
+        if ($decimal < strlen($outputAlphabet)) {
+            return $outputAlphabetCharacters[$decimal];
+        }
 
-                if ($newLength > 0) {
-                    $numbers[$newLength++] = 0;
-                }
-            }
+        $result = '';
+        $outputAlphabetLength = (string) strlen($outputAlphabet);
 
-            $length = $newLength;
-            $converted = $outputBase[$divide] . $converted;
-        } while ($newLength > 0);
+        while ($decimal !== '0') {
+            $result = $outputAlphabetCharacters[bcmod($decimal, $outputAlphabetLength)] . $result;
+            $decimal = bcdiv($decimal, $outputAlphabetLength, 0);
+        }
 
-        return $converted;
+        return $result;
     }
 
     /**
@@ -161,18 +156,15 @@ class Huffman
         $maxLength = $this->dictionary->getMaxLength();
 
         if ($maxLength === Dictionary::MAX_LENGTH_WHOLE_WORDS) {
-            $maxLength = strlen($decoded) - $index;
-            $values = $this->dictionary->getValues();
-
-            foreach ($values as $key => $value) {
+            foreach ($this->dictionary->getValues($decoded[$index]) as $key => $value) {
                 $key = (string) $key;
-                $i = strlen($key);
-                $substr = substr($decoded, $index, $i);
 
-                if ($substr === $key) {
-                    return [$i, $value];
+                if (strpos($decoded, $key, $index) === $index) {
+                    return [strlen($key), $value];
                 }
             }
+
+            $maxLength = strlen($decoded) - $index;
         }
 
         for ($i = $maxLength; $i > 0; $i--) {

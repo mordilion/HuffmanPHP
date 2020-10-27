@@ -13,21 +13,33 @@ $values = array_merge(
         'beta',
         'cesar',
         'delta',
-        'gamma',
         'and',
         'or',
-    ]
+        '-'
+    ],
 );
 
 $dict = new Dictionary($values, Dictionary::MAX_LENGTH_WHOLE_WORDS);
 $huff = new Huffman($dict);
+$times = [
+    'encoding' => [],
+    'decoding' => [],
+];
+
+$count = 0;
 
 for ($i = 1; $i <= count($values); $i++) {
     for ($j = 0; $j < count($values); $j++) {
+        $count++;
         $value = implode('', array_slice($values, $j, $i));
 
+        $start = microtime(true);
         $encoded = $huff->encode($value, true);
+        $times['encoding'][] = microtime(true) - $start;
+
+        $start = microtime(true);
         $decoded = $huff->decode($encoded, true);
+        $times['decoding'][] = microtime(true) - $start;
 
         if ($decoded !== $value) {
             echo PHP_EOL;
@@ -42,4 +54,12 @@ for ($i = 1; $i <= count($values); $i++) {
 }
 
 echo PHP_EOL;
+echo 'Total: ' . $count . PHP_EOL;
+echo 'AVG Time (Encoding): ' . (array_sum($times['encoding']) / count($times['encoding'])) . PHP_EOL;
+echo 'Min Time (Encoding): ' . (min($times['encoding'])) . PHP_EOL;
+echo 'Max Time (Encoding): ' . (max($times['encoding'])) . PHP_EOL;
+echo 'AVG Time (Decoding): ' . (array_sum($times['decoding']) / count($times['decoding'])) . PHP_EOL;
+echo 'Min Time (Decoding): ' . (min($times['decoding'])) . PHP_EOL;
+echo 'Max Time (Decoding): ' . (max($times['decoding'])) . PHP_EOL;
+echo memory_get_usage(true) . PHP_EOL;
 

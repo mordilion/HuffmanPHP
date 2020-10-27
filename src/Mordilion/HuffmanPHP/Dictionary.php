@@ -38,6 +38,11 @@ class Dictionary
     private $values = [];
 
     /**
+     * @var array
+     */
+    private $valuesCache = [];
+
+    /**
      * Dictionary constructor.
      *
      * @param array $values
@@ -69,11 +74,29 @@ class Dictionary
     }
 
     /**
+     * @param string|null $startCharacter
+     *
      * @return array
      */
-    public function getValues(): array
+    public function getValues(?string $startCharacter = null): array
     {
-        return $this->values;
+        if ($startCharacter === null) {
+            return $this->values;
+        }
+
+        if (isset($this->valuesCache[$startCharacter])) {
+            return $this->valuesCache[$startCharacter];
+        }
+
+        $this->valuesCache[$startCharacter] = [];
+
+        foreach ($this->values as $key => $value) {
+            if (strpos((string) $key, $startCharacter) === 0) {
+                $this->valuesCache[$startCharacter][$key] = $value;
+            }
+        }
+
+        return $this->valuesCache[$startCharacter];
     }
 
     /**
