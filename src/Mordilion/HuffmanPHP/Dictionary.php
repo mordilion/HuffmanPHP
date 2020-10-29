@@ -28,6 +28,11 @@ class Dictionary
     private $maxLength;
 
     /**
+     * @var int
+     */
+    private $minBinaryLength = PHP_INT_MAX;
+
+    /**
      * @var array
      */
     private $occurrences = [];
@@ -40,7 +45,12 @@ class Dictionary
     /**
      * @var array
      */
-    private $valuesCache = [];
+    private $valuesFlipped = [];
+
+    /**
+     * @var array
+     */
+    private $valuesByCharacter = [];
 
     /**
      * Dictionary constructor.
@@ -61,6 +71,10 @@ class Dictionary
 
         $keys = array_map('strlen', array_keys($this->values));
         array_multisort($keys, SORT_DESC, $this->values);
+
+        $this->buildValuesByCharacter();
+
+        $this->valuesFlipped = array_flip($this->values);
     }
 
     /**
@@ -84,19 +98,7 @@ class Dictionary
             return $this->values;
         }
 
-        if (isset($this->valuesCache[$startCharacter])) {
-            return $this->valuesCache[$startCharacter];
-        }
-
-        $this->valuesCache[$startCharacter] = [];
-
-        foreach ($this->values as $key => $value) {
-            if (strpos((string) $key, $startCharacter) === 0) {
-                $this->valuesCache[$startCharacter][$key] = $value;
-            }
-        }
-
-        return $this->valuesCache[$startCharacter];
+        return $this->valuesByCharacter[$startCharacter] ?? [];
     }
 
     /**
@@ -108,13 +110,21 @@ class Dictionary
     }
 
     /**
+     * @return int
+     */
+    public function getMinBinaryLength(): int
+    {
+        return $this->minBinaryLength;
+    }
+
+    /**
      * @param string $binary
      *
      * @return false|int|string
      */
     public function getValue(string $binary)
     {
-        return array_search($binary, $this->values, true);
+        return $this->valuesFlipped[$binary] ?? false;
     }
 
     /**
@@ -122,7 +132,16 @@ class Dictionary
      */
     public function setValues(array $values): void
     {
+        $this->minBinaryLength = PHP_INT_MAX;
+
+        foreach ($values as $value) {
+            $this->minBinaryLength = min($this->minBinaryLength, strlen($value));
+        }
+
         $this->values = $values;
+        $this->buildValuesByCharacter();
+
+        $this->valuesFlipped = array_flip($this->values);
     }
 
     /**
@@ -190,7 +209,18 @@ class Dictionary
             return;
         }
 
+        $this->minBinaryLength = min($this->minBinaryLength, strlen($value));
         $this->values[$data] = $value;
+    }
+
+    private function buildValuesByCharacter(): void
+    {
+        $this->valuesByCharacter = [];
+
+        foreach ($this->values as $key => $value) {
+            $keyString = (string) $key;
+            $this->valuesByCharacter[$keyString[0]][$key] = $value;
+        }
     }
 
     /**

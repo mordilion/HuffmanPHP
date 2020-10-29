@@ -20,9 +20,8 @@ use RuntimeException;
  */
 class Huffman
 {
-    private const BASE_MAX = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_~';
-    private const BASE_DECIMAL = '0123456789';
-    private const BASE_BINARY = '01';
+    private const ALPHABET_MAX = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_~';
+    private const ALPHABET_BINARY = '01';
 
     /**
      * @var Dictionary
@@ -52,23 +51,23 @@ class Huffman
         }
 
         if ($compressed) {
-            $encoded = substr($this->convertBase($encoded, self::BASE_MAX, self::BASE_BINARY), 1);
+            $encoded = substr($this->convertBase($encoded, self::ALPHABET_MAX, self::ALPHABET_BINARY), 1);
         }
 
         $decoded = '';
         $length = strlen($encoded);
+        $minBinaryLength = $this->dictionary->getMinBinaryLength() - 1;
 
         for ($i = 0; $i < $length; $i++) {
             $key = false;
-            $count = 0;
+            $count = $minBinaryLength;
 
-            while ($key === false && $count <= $length - $i) {
-                $binary = substr($encoded, $i, ++$count);
-                $key = $this->dictionary->getValue($binary);
+            while  ($key === false && $count <= $length - 1) {
+                $key = $this->dictionary->getValue(substr($encoded, $i, ++$count));
             }
 
+            $decoded .= $key;
             $i += $count - 1;
-            $decoded .= $key !== false ? $key : '';
         }
 
         return $decoded;
@@ -96,7 +95,7 @@ class Huffman
         }
 
         if ($compress) {
-            return $this->convertBase('1'. $encoded, self::BASE_BINARY, self::BASE_MAX);
+            return $this->convertBase('1'. $encoded, self::ALPHABET_BINARY, self::ALPHABET_MAX);
         }
 
         return $encoded;
@@ -111,34 +110,24 @@ class Huffman
      */
     private function convertBase(string $input, string $inputAlphabet, string $outputAlphabet): string
     {
-        if ($outputAlphabet === self::BASE_DECIMAL) {
-            $inputAlphabetLength = (string) strlen($inputAlphabet);
-            $inputLength = strlen($input);
-            $result = (string) strpos($inputAlphabet, $input[0]);
+        $inputAlphabetLength = (string) strlen($inputAlphabet);
+        $outputAlphabetLength = (string) strlen($outputAlphabet);
 
-            for ($i = 1; $i < $inputLength; $i++) {
-                $result = bcadd(bcmul($inputAlphabetLength, $result), (string) strpos($inputAlphabet, $input[$i]));
-            }
+        $inputLength = strlen($input);
+        $decimal = (string) strpos($inputAlphabet, $input[0]);
 
-            return $result;
+        for ($i = 1; $i < $inputLength; $i++) {
+            $decimal = bcadd(bcmul($inputAlphabetLength, $decimal), (string) strpos($inputAlphabet, $input[$i]));
         }
 
-        $decimal = $input;
-        $outputAlphabetCharacters = str_split($outputAlphabet, 1);
-
-        if ($inputAlphabet !== self::BASE_DECIMAL) {
-            $decimal = $this->convertBase($input, $inputAlphabet, self::BASE_DECIMAL);
-        }
-
-        if ($decimal < strlen($outputAlphabet)) {
-            return $outputAlphabetCharacters[$decimal];
+        if ($decimal < $outputAlphabetLength) {
+            return $outputAlphabet[(int) $decimal];
         }
 
         $result = '';
-        $outputAlphabetLength = (string) strlen($outputAlphabet);
 
         while ($decimal !== '0') {
-            $result = $outputAlphabetCharacters[bcmod($decimal, $outputAlphabetLength)] . $result;
+            $result = $outputAlphabet[(int) bcmod($decimal, $outputAlphabetLength)] . $result;
             $decimal = bcdiv($decimal, $outputAlphabetLength, 0);
         }
 
