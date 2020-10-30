@@ -67,11 +67,12 @@ class Huffman
 
         $decoded = '';
         $length = strlen($encoded);
+        $i = 0;
 
-        for ($i = 0; $i < $length; $i++) {
+        while ($i < $length) {
             [$inc, $value] = $this->getBestValue($encoded, $i);
             $decoded .= $value;
-            $i += $inc - 1;
+            $i += $inc;
         }
 
         $this->cache['decode'][$encodedOriginal] = $decoded;
@@ -97,11 +98,12 @@ class Huffman
 
         $encoded = '';
         $length = strlen($decoded);
+        $i = 0;
 
-        for ($i = 0; $i < $length; $i++) {
+        while ($i < $length) {
             [$inc, $binary] = $this->getBestBinary($decoded, $i);
             $encoded .= $binary;
-            $i += $inc - 1;
+            $i += $inc;
         }
 
         if ($compress) {

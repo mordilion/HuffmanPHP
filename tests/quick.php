@@ -35,11 +35,11 @@ for ($i = 1; $i <= count($values); $i++) {
         $value = implode('', array_slice($values, $j, $i));
 
         $start = microtime(true);
-        $encoded = $huff->encode($value, false);
+        $encoded = $huff->encode($value, true);
         $times['encoding'][] = microtime(true) - $start;
 
         $start = microtime(true);
-        $decoded = $huff->decode($encoded, false);
+        $decoded = $huff->decode($encoded, true);
         $times['decoding'][] = microtime(true) - $start;
 
         if ($decoded !== $value) {
