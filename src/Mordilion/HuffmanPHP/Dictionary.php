@@ -45,12 +45,22 @@ class Dictionary
     /**
      * @var array
      */
-    private $valuesFlipped = [];
+    private $valuesByCharacter = [];
 
     /**
      * @var array
      */
-    private $valuesByCharacter = [];
+    private $valuesReversed = [];
+
+    /**
+     * @var array
+     */
+    private $valuesReversedByCharacter = [];
+
+    /**
+     * @var array
+     */
+    private $valuesFlipped = [];
 
     /**
      * Dictionary constructor.
@@ -68,13 +78,7 @@ class Dictionary
 
         $this->calculateOccurrences($values);
         $this->buildDictionary($this->occurrences);
-
-        $keys = array_map('strlen', array_keys($this->values));
-        array_multisort($keys, SORT_DESC, $this->values);
-
-        $this->buildValuesByCharacter();
-
-        $this->valuesFlipped = array_flip($this->values);
+        $this->prepareValues();
     }
 
     /**
@@ -98,7 +102,19 @@ class Dictionary
             return $this->values;
         }
 
-        return $this->valuesByCharacter[$startCharacter] ?? [];
+        return $this->valuesByCharacter[$startCharacter] ?? $this->values;
+    }
+
+    /**
+     * @return array
+     */
+    public function getValuesReversed(?string $startCharacter = null): array
+    {
+        if ($startCharacter === null) {
+            return $this->valuesReversed;
+        }
+
+        return $this->valuesReversedByCharacter[$startCharacter] ?? $this->valuesReversed;
     }
 
     /**
@@ -132,16 +148,9 @@ class Dictionary
      */
     public function setValues(array $values): void
     {
-        $this->minBinaryLength = PHP_INT_MAX;
-
-        foreach ($values as $value) {
-            $this->minBinaryLength = min($this->minBinaryLength, strlen($value));
-        }
-
         $this->values = $values;
-        $this->buildValuesByCharacter();
 
-        $this->valuesFlipped = array_flip($this->values);
+        $this->prepareValues();
     }
 
     /**
@@ -209,17 +218,31 @@ class Dictionary
             return;
         }
 
-        $this->minBinaryLength = min($this->minBinaryLength, strlen($value));
         $this->values[$data] = $value;
     }
 
-    private function buildValuesByCharacter(): void
+    private function prepareValues(): void
     {
+        $this->valuesReversed = $this->values;
+
+        $keys = array_map('strlen', array_keys($this->values));
+        array_multisort($keys, SORT_DESC, $this->values);
+        $keys = array_map('strlen', $this->valuesReversed);
+        array_multisort($keys, SORT_ASC, $this->valuesReversed);
+
+        $this->minBinaryLength = PHP_INT_MAX;
+        $this->valuesFlipped = array_flip($this->values);
         $this->valuesByCharacter = [];
+        $this->valuesReversedByCharacter = [];
 
         foreach ($this->values as $key => $value) {
             $keyString = (string) $key;
             $this->valuesByCharacter[$keyString[0]][$key] = $value;
+            $this->minBinaryLength = min($this->minBinaryLength, strlen($value));
+        }
+
+        foreach ($this->valuesReversed as $key => $value) {
+            $this->valuesReversedByCharacter[substr($value, 0, $this->minBinaryLength)][$key] = $value;
         }
     }
 

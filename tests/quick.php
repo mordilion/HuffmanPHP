@@ -27,6 +27,7 @@ $times = [
 ];
 
 $count = 0;
+$totalStart = microtime(true);
 
 for ($i = 1; $i <= count($values); $i++) {
     for ($j = 0; $j < count($values); $j++) {
@@ -34,11 +35,11 @@ for ($i = 1; $i <= count($values); $i++) {
         $value = implode('', array_slice($values, $j, $i));
 
         $start = microtime(true);
-        $encoded = $huff->encode($value, true);
+        $encoded = $huff->encode($value, false);
         $times['encoding'][] = microtime(true) - $start;
 
         $start = microtime(true);
-        $decoded = $huff->decode($encoded, true);
+        $decoded = $huff->decode($encoded, false);
         $times['decoding'][] = microtime(true) - $start;
 
         if ($decoded !== $value) {
@@ -53,13 +54,34 @@ for ($i = 1; $i <= count($values); $i++) {
     echo '.';
 }
 
+function getMedian(array $array): float
+{
+    sort($array);
+    $count = count($array);
+    $middleValue = floor(($count - 1) / 2);
+
+    if ($count % 2) {
+        return $array[$middleValue];
+    }
+
+    $lowMiddle = $array[$middleValue];
+    $highMiddle = $array[$middleValue + 1];
+
+    return (($lowMiddle + $highMiddle) / 2);
+}
+
 echo PHP_EOL;
-echo 'Total: ' . $count . PHP_EOL;
-echo 'AVG Time (Encoding): ' . (array_sum($times['encoding']) / count($times['encoding'])) . PHP_EOL;
-echo 'Min Time (Encoding): ' . (min($times['encoding'])) . PHP_EOL;
-echo 'Max Time (Encoding): ' . (max($times['encoding'])) . PHP_EOL;
-echo 'AVG Time (Decoding): ' . (array_sum($times['decoding']) / count($times['decoding'])) . PHP_EOL;
-echo 'Min Time (Decoding): ' . (min($times['decoding'])) . PHP_EOL;
-echo 'Max Time (Decoding): ' . (max($times['decoding'])) . PHP_EOL;
+echo 'Total: ' . $count . ' (' . (microtime(true) - $totalStart) . ')' . PHP_EOL;
+echo PHP_EOL;
+echo 'Encoding' . PHP_EOL;
+echo '    AVG Time: ' . (array_sum($times['encoding']) / count($times['encoding'])) . PHP_EOL;
+echo '    Min Time: ' . (min($times['encoding'])) . PHP_EOL;
+echo '    Max Time: ' . (max($times['encoding'])) . PHP_EOL;
+echo '    Median Time: ' . (getMedian($times['encoding'])) . PHP_EOL;
+echo 'Decoding' . PHP_EOL;
+echo '    AVG Time: ' . (array_sum($times['decoding']) / count($times['decoding'])) . PHP_EOL;
+echo '    Min Time: ' . (min($times['decoding'])) . PHP_EOL;
+echo '    Max Time: ' . (max($times['decoding'])) . PHP_EOL;
+echo '    Median Time: ' . (getMedian($times['decoding'])) . PHP_EOL;
 echo memory_get_usage(true) . PHP_EOL;
 

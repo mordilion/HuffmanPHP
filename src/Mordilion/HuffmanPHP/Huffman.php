@@ -24,6 +24,11 @@ class Huffman
     private const ALPHABET_BINARY = '01';
 
     /**
+     * @var array
+     */
+    private $cache;
+
+    /**
      * @var Dictionary
      */
     private $dictionary;
@@ -50,25 +55,26 @@ class Huffman
             return '';
         }
 
+        if (isset($this->cache['decode'][$encoded])) {
+            return $this->cache['decode'][$encoded];
+        }
+
+        $encodedOriginal = $encoded;
+
         if ($compressed) {
             $encoded = substr($this->convertBase($encoded, self::ALPHABET_MAX, self::ALPHABET_BINARY), 1);
         }
 
         $decoded = '';
         $length = strlen($encoded);
-        $minBinaryLength = $this->dictionary->getMinBinaryLength() - 1;
 
         for ($i = 0; $i < $length; $i++) {
-            $key = false;
-            $count = $minBinaryLength;
-
-            while  ($key === false && $count <= $length - 1) {
-                $key = $this->dictionary->getValue(substr($encoded, $i, ++$count));
-            }
-
-            $decoded .= $key;
-            $i += $count - 1;
+            [$inc, $value] = $this->getBestValue($encoded, $i);
+            $decoded .= $value;
+            $i += $inc - 1;
         }
+
+        $this->cache['decode'][$encodedOriginal] = $decoded;
 
         return $decoded;
     }
@@ -85,6 +91,10 @@ class Huffman
             return '';
         }
 
+        if (isset($this->cache['encode'][$decoded])) {
+            return $this->cache['encode'][$decoded];
+        }
+
         $encoded = '';
         $length = strlen($decoded);
 
@@ -97,6 +107,8 @@ class Huffman
         if ($compress) {
             return $this->convertBase('1'. $encoded, self::ALPHABET_BINARY, self::ALPHABET_MAX);
         }
+
+        $this->cache['encode'][$decoded] = $encoded;
 
         return $encoded;
     }
@@ -112,12 +124,11 @@ class Huffman
     {
         $inputAlphabetLength = (string) strlen($inputAlphabet);
         $outputAlphabetLength = (string) strlen($outputAlphabet);
+        $inputAlphabetFlipped = array_flip(str_split($inputAlphabet));
+        $decimal = '0';
 
-        $inputLength = strlen($input);
-        $decimal = (string) strpos($inputAlphabet, $input[0]);
-
-        for ($i = 1; $i < $inputLength; $i++) {
-            $decimal = bcadd(bcmul($inputAlphabetLength, $decimal), (string) strpos($inputAlphabet, $input[$i]));
+        foreach (str_split($input) as $char) {
+            $decimal = bcadd(bcmul($inputAlphabetLength, $decimal), (string) $inputAlphabetFlipped[$char]);
         }
 
         if ($decimal < $outputAlphabetLength) {
@@ -142,29 +153,31 @@ class Huffman
      */
     private function getBestBinary(string $decoded, int $index): array
     {
-        $maxLength = $this->dictionary->getMaxLength();
+        foreach ($this->dictionary->getValues($decoded[$index]) as $key => $value) {
+            $key = (string) $key;
 
-        if ($maxLength === Dictionary::MAX_LENGTH_WHOLE_WORDS) {
-            foreach ($this->dictionary->getValues($decoded[$index]) as $key => $value) {
-                $key = (string) $key;
-
-                if (strpos($decoded, $key, $index) === $index) {
-                    return [strlen($key), $value];
-                }
-            }
-
-            $maxLength = strlen($decoded) - $index;
-        }
-
-        for ($i = $maxLength; $i > 0; $i--) {
-            $substr = substr($decoded, $index, $i);
-            $binary = $this->dictionary->getBinary($substr);
-
-            if ($binary !== null) {
-                return [$i, $binary];
+            if (strpos($decoded, $key, $index) === $index) {
+                return [strlen($key), $value];
             }
         }
 
         throw new RuntimeException(sprintf('Unknown key for "%s"', substr($decoded, $index)));
+    }
+
+    /**
+     * @param string $encoded
+     * @param int    $index
+     *
+     * @return array
+     */
+    private function getBestValue(string $encoded, int $index): array
+    {
+        foreach ($this->dictionary->getValuesReversed(substr($encoded, $index, $this->dictionary->getMinBinaryLength())) as $key => $value) {
+            if (strpos($encoded, $value, $index) === $index) {
+                return [strlen($value), $key];
+            }
+        }
+
+        throw new RuntimeException(sprintf('Unknown key for "%s"', substr($encoded, $index)));
     }
 }
