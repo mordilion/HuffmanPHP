@@ -176,7 +176,7 @@ class Dictionary
                 for ($i = 0; $i < $length; $i++) {
                     $substr = substr($value, $i, $substrLength);
                     $occurrences[$substr] = [
-                        'count' => (int) ($occurrences[$value]['count'] ?? 0) + substr_count($value, $substr),
+                        'count' => (int) ($occurrences[$substr]['count'] ?? 0) + substr_count($value, $substr),
                         'value' => $substr,
                     ];
                 }
@@ -212,8 +212,8 @@ class Dictionary
         }
 
         if (is_array($data)) {
-            $this->buildDictionary($data[0]['value'] ?? null, $value . '0');
-            $this->buildDictionary($data[1]['value'] ?? null, $value . '1');
+            $this->buildDictionary($data[0]['value'] ?? null, $value . '1');
+            $this->buildDictionary($data[1]['value'] ?? null, $value . '0');
 
             return;
         }
