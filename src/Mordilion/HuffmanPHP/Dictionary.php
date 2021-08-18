@@ -164,7 +164,8 @@ class Dictionary
             if ($this->maxLength === self::MAX_LENGTH_WHOLE_WORDS) {
                 $occurrences[$value] = [
                     'count' => (int) ($occurrences[$value]['count'] ?? 0) + 1,
-                    'value' => $value,
+                    'depth' => 0,
+                    'data' => [$value => ''],
                 ];
             }
 
@@ -175,50 +176,55 @@ class Dictionary
 
                 for ($i = 0; $i < $length; $i++) {
                     $substr = substr($value, $i, $substrLength);
+
                     $occurrences[$substr] = [
-                        'count' => (int) ($occurrences[$substr]['count'] ?? 0) + substr_count($value, $substr),
-                        'value' => $substr,
+                        'count' => (int) ($occurrences[$substr]['count'] ?? 0) + 1,
+                        'depth' => 0,
+                        'data' => [$substr => ''],
                     ];
                 }
             }
         }
 
-        ksort($occurrences);
-        $this->sortByCount($occurrences);
+        $this->occurrences = $occurrences;
+    }
+
+    /**
+     * @param array $occurrences
+     */
+    private function buildDictionary(array $occurrences): void
+    {
+        $this->sortByCountAndDepth($occurrences);
 
         while (count($occurrences) > 1) {
             $row1 = array_shift($occurrences);
             $row2 = array_shift($occurrences);
 
+            foreach ($row1['data'] as &$binary) {
+                $binary = '0' . $binary;
+            }
+            unset($binary);
+
+            foreach ($row2['data'] as &$binary) {
+                $binary = '1' . $binary;
+            }
+            unset($binary);
+
             $occurrences[] = [
-                'count' => (int) $row1['count'] + (int) $row2['count'],
-                'value' => [$row1, $row2],
+                'count' => $row1['count'] + $row2['count'],
+                'depth' => max($row1['depth'], $row2['depth']) + 1,
+                'data' => $row1['data'] + $row2['data'],
             ];
 
-            $this->sortByCount($occurrences);
+            $this->sortByCountAndDepth($occurrences);
         }
 
-        $this->occurrences = (array) (reset($occurrences)['value'] ?? []);
-    }
+        $values = reset($occurrences);
+        $data = (array) ($values['data'] ?? []);
 
-    /**
-     * @param null|array|string|int $data
-     * @param string                $value
-     */
-    private function buildDictionary($data, string $value = ''): void
-    {
-        if ($data === null) {
-            return;
+        foreach ($data as $value => $binary) {
+            $this->values[$value] = $binary;
         }
-
-        if (is_array($data)) {
-            $this->buildDictionary($data[0]['value'] ?? null, $value . '1');
-            $this->buildDictionary($data[1]['value'] ?? null, $value . '0');
-
-            return;
-        }
-
-        $this->values[$data] = $value;
     }
 
     private function prepareValues(): void
@@ -249,10 +255,16 @@ class Dictionary
     /**
      * @param array $occurrences
      */
-    private function sortByCount(array &$occurrences): void
+    private function sortByCountAndDepth(array &$occurrences): void
     {
         usort($occurrences, static function (array $left, array $right) {
-            return (int) $left['count'] <=> (int) $right['count'];
+            $compare = (int) $left['count'] <=> (int) $right['count'];
+
+            if ($compare !== 0) {
+                return $compare;
+            }
+
+            return (int) $left['depth'] <=> (int) $right['depth'];
         });
     }
 }
