@@ -176,7 +176,7 @@ class Dictionary
                 for ($i = 0; $i < $length; $i++) {
                     $substr = substr($value, $i, $substrLength);
                     $occurrences[$substr] = [
-                        'count' => substr_count($value, $substr),
+                        'count' => (int) ($occurrences[$value]['count'] ?? 0) + substr_count($value, $substr),
                         'value' => $substr,
                     ];
                 }
