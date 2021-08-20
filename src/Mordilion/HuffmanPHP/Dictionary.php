@@ -231,10 +231,13 @@ class Dictionary
     {
         $this->valuesReversed = $this->values;
 
-        $keys = array_map('strlen', array_keys($this->values));
-        array_multisort($keys, SORT_DESC, $this->values);
-        $keys = array_map('strlen', $this->valuesReversed);
-        array_multisort($keys, SORT_ASC, $this->valuesReversed);
+        uksort($this->values, static function ($left, $right) {
+            return strlen((string) $right) <=> strlen((string) $left);
+        });
+
+        uasort($this->valuesReversed, static function ($left, $right) {
+            return strlen((string) $left) <=> strlen((string) $right);
+        });
 
         $this->minBinaryLength = PHP_INT_MAX;
         $this->valuesFlipped = array_flip($this->values);
