@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Mordilion\HuffmanPHP;
 
 use InvalidArgumentException;
+use Mordilion\HuffmanPHP\Dictionary\Occurrence;
 
 /**
  * @author Henning Huncke <mordilion@gmx.de>
@@ -33,7 +34,7 @@ class Dictionary
     private $minBinaryLength = PHP_INT_MAX;
 
     /**
-     * @var array
+     * @var Occurrence[]
      */
     private $occurrences = [];
 
@@ -158,15 +159,15 @@ class Dictionary
      */
     private function calculateOccurrences(array $values): void
     {
+        /** @var Occurrence[] $occurrences */
         $occurrences = [];
 
         foreach ($values as $value) {
             if ($this->maxLength === self::MAX_LENGTH_WHOLE_WORDS) {
-                $occurrences[$value] = [
-                    'count' => (int) ($occurrences[$value]['count'] ?? 0) + 1,
-                    'depth' => 0,
-                    'data' => [$value => ''],
-                ];
+                $count = isset($occurrences[$value]) ? $occurrences[$value]->getCount() : 0;
+                $occurrences[$value] = Occurrence::createInitialized($count + 1, $value);
+
+                continue;
             }
 
             $length = strlen($value);
@@ -176,12 +177,8 @@ class Dictionary
 
                 for ($i = 0; $i < $length; $i++) {
                     $substr = substr($value, $i, $substrLength);
-
-                    $occurrences[$substr] = [
-                        'count' => (int) ($occurrences[$substr]['count'] ?? 0) + 1,
-                        'depth' => 0,
-                        'data' => [$substr => ''],
-                    ];
+                    $count = isset($occurrences[$substr]) ? $occurrences[$substr]->getCount() : 0;
+                    $occurrences[$substr] = Occurrence::createInitialized($count + 1, $substr);
                 }
             }
         }
@@ -190,37 +187,30 @@ class Dictionary
     }
 
     /**
-     * @param array $occurrences
+     * @param Occurrence[] $occurrences
      */
     private function buildDictionary(array $occurrences): void
     {
         $this->sortByCountAndDepth($occurrences);
 
         while (count($occurrences) > 1) {
-            $row1 = array_shift($occurrences);
-            $row2 = array_shift($occurrences);
+            $occurrence1 = array_shift($occurrences);
+            $occurrence2 = array_shift($occurrences);
 
-            foreach ($row1['data'] as &$binary) {
-                $binary = '0' . $binary;
+            foreach ($occurrence1->getData() as $value => $binary) {
+                $occurrence1->setValue($value, '0' . $binary);
             }
-            unset($binary);
 
-            foreach ($row2['data'] as &$binary) {
-                $binary = '1' . $binary;
+            foreach ($occurrence2->getData() as $value => $binary) {
+                $occurrence2->setValue($value, '1' . $binary);
             }
-            unset($binary);
 
-            $occurrences[] = [
-                'count' => $row1['count'] + $row2['count'],
-                'depth' => max($row1['depth'], $row2['depth']) + 1,
-                'data' => $row1['data'] + $row2['data'],
-            ];
-
+            $occurrences[] = Occurrence::createFromOccurrences($occurrence1, $occurrence2);
             $this->sortByCountAndDepth($occurrences);
         }
 
         $values = reset($occurrences);
-        $data = (array) ($values['data'] ?? []);
+        $data = $values->getData();
 
         foreach ($data as $value => $binary) {
             $this->values[$value] = $binary;
@@ -260,14 +250,14 @@ class Dictionary
      */
     private function sortByCountAndDepth(array &$occurrences): void
     {
-        usort($occurrences, static function (array $left, array $right) {
-            $compare = (int) $left['count'] <=> (int) $right['count'];
+        usort($occurrences, static function (Occurrence $left, Occurrence $right) {
+            $compare = $left->getCount() <=> $right->getCount();
 
             if ($compare !== 0) {
                 return $compare;
             }
 
-            return (int) $left['depth'] <=> (int) $right['depth'];
+            return $left->getDepth() <=> $right->getDepth();
         });
     }
 }

@@ -2,10 +2,8 @@
 
 /**
  * This file is part of the Mordilion\HuffmanPHP package.
- *
  * For the full copyright and license information, please view the
  * LICENSE file that was distributed with this source code.
- *
  * @copyright (c) Henning Huncke - <mordilion@gmx.de>
  */
 
@@ -20,13 +18,26 @@ use RuntimeException;
  */
 class Huffman
 {
-    private const ALPHABET_MAX = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_~';
+    public const ALPHABET_BASE10 = '0123456789';
+    public const ALPHABET_BASE16 = '0123456789ABCDEF';
+    public const ALPHABET_BASE16_LOWER = '0123456789abcdef';
+    public const ALPHABET_BASE25 = 'ABCDEFGHIJKLMNOPQRSTUVWXY';
+    public const ALPHABET_BASE25_LOWER = 'abcdefghijklmnopqrstuvwxyz';
+    public const ALPHABET_BASE36 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXY';
+    public const ALPHABET_BASE36_LOWER = '0123456789abcdefghijklmnopqrstuvwxyz';
+    public const ALPHABET_BASE62 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    public const ALPHABET_BASE65 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_~'; // MAX URL-SAFE ALPHABET
     private const ALPHABET_BINARY = '01';
 
     /**
      * @var array
      */
     private $cache;
+
+    /**
+     * @var string
+     */
+    private $compressAlphabet;
 
     /**
      * @var Dictionary
@@ -37,10 +48,12 @@ class Huffman
      * Huffman constructor.
      *
      * @param Dictionary $dictionary
+     * @param string     $compressAlphabet
      */
-    public function __construct(Dictionary $dictionary)
+    public function __construct(Dictionary $dictionary, string $compressAlphabet = self::ALPHABET_BASE65)
     {
         $this->dictionary = $dictionary;
+        $this->compressAlphabet = $compressAlphabet;
     }
 
     /**
@@ -62,7 +75,7 @@ class Huffman
         $encodedOriginal = $encoded;
 
         if ($compressed) {
-            $encoded = substr($this->convertBase($encoded, self::ALPHABET_MAX, self::ALPHABET_BINARY), 1);
+            $encoded = substr($this->convertBase($encoded, $this->compressAlphabet, self::ALPHABET_BINARY), 1);
         }
 
         $decoded = '';
@@ -107,7 +120,7 @@ class Huffman
         }
 
         if ($compress) {
-            return $this->convertBase('1'. $encoded, self::ALPHABET_BINARY, self::ALPHABET_MAX);
+            return $this->convertBase('1' . $encoded, self::ALPHABET_BINARY, $this->compressAlphabet);
         }
 
         $this->cache['encode'][$decoded] = $encoded;
