@@ -191,6 +191,10 @@ class Dictionary
      */
     private function buildDictionary(array $occurrences): void
     {
+        if (empty($occurrences)) {
+            return;
+        }
+
         $this->sortByCountAndDepth($occurrences);
 
         while (count($occurrences) > 1) {
@@ -210,7 +214,7 @@ class Dictionary
         }
 
         $values = reset($occurrences);
-        $data = $values->getData();
+        $data = $values instanceof Occurrence ? $values->getData() : [];
 
         foreach ($data as $value => $binary) {
             $this->values[$value] = $binary;
