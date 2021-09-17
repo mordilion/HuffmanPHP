@@ -24,7 +24,7 @@ final class Occurrence
     private $count;
 
     /**
-     * @var array<string|int, string>
+     * @var array<string, string>
      */
     private $data;
 
@@ -49,7 +49,7 @@ final class Occurrence
     {
         return new self(
             $occurrence1->getCount() + $occurrence2->getCount(),
-            array_merge($occurrence1->getData(), $occurrence2->getData()),
+            array_replace($occurrence1->getData(), $occurrence2->getData()),
             max($occurrence1->getDepth(), $occurrence2->getDepth()) + 1
         );
     }
@@ -80,7 +80,7 @@ final class Occurrence
     }
 
     /**
-     * @param int|string $value
+     * @param string|int $value
      */
     public function setValue($value, string $binary): void
     {

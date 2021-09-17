@@ -173,10 +173,8 @@ class Dictionary
             $length = strlen($value);
 
             for ($j = $this->maxLength; $j > 0; $j--) {
-                $substrLength = $j;
-
                 for ($i = 0; $i < $length; $i++) {
-                    $substr = substr($value, $i, $substrLength);
+                    $substr = substr($value, $i, $j);
                     $count = isset($occurrences[$substr]) ? $occurrences[$substr]->getCount() : 0;
                     $occurrences[$substr] = Occurrence::createInitialized($count + 1, $substr);
                 }
@@ -202,11 +200,11 @@ class Dictionary
             $occurrence2 = array_shift($occurrences);
 
             foreach ($occurrence1->getData() as $value => $binary) {
-                $occurrence1->setValue($value, '0' . $binary);
+                $occurrence1->setValue($value, '1' . $binary);
             }
 
             foreach ($occurrence2->getData() as $value => $binary) {
-                $occurrence2->setValue($value, '1' . $binary);
+                $occurrence2->setValue($value, '0' . $binary);
             }
 
             $occurrences[] = Occurrence::createFromOccurrences($occurrence1, $occurrence2);
