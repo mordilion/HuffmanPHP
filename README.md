@@ -1,6 +1,6 @@
 # huffman-php
 ## Usage
-```
+```php
 <?php
 
 use Mordilion\HuffmanPHP\Dictionary;
