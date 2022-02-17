@@ -21,6 +21,8 @@ use Mordilion\HuffmanPHP\Dictionary\Occurrence;
  */
 class Dictionary
 {
+    use StableSortable;
+
     public const MAX_LENGTH_WHOLE_WORDS = 0;
 
     /**
@@ -223,11 +225,11 @@ class Dictionary
     {
         $this->valuesReversed = $this->values;
 
-        uksort($this->values, static function ($left, $right) {
+        $this->uksort($this->values, static function ($left, $right) {
             return strlen((string) $right) <=> strlen((string) $left);
         });
 
-        uasort($this->valuesReversed, static function ($left, $right) {
+        $this->uasort($this->valuesReversed, static function ($left, $right) {
             return strlen((string) $left) <=> strlen((string) $right);
         });
 
@@ -252,7 +254,7 @@ class Dictionary
      */
     private function sortByCountAndDepth(array &$occurrences): void
     {
-        usort($occurrences, static function (Occurrence $left, Occurrence $right) {
+        $this->usort($occurrences, static function (Occurrence $left, Occurrence $right) {
             $compare = $left->getCount() <=> $right->getCount();
 
             if ($compare !== 0) {
