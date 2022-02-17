@@ -46,8 +46,8 @@ class DictionaryTest extends TestCase
         $dictionaryValues = $dictionary->getValues();
 
         self::assertEquals('1', $dictionaryValues['a']);
-        self::assertEquals('00', $dictionaryValues['b']);
-        self::assertEquals('01', $dictionaryValues['c']);
+        self::assertEquals('01', $dictionaryValues['b']);
+        self::assertEquals('00', $dictionaryValues['c']);
     }
 
     public function testDictionaryHasTheCorrectSortedValuesWithIntegerValues()
