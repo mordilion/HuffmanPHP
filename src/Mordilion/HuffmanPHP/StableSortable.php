@@ -25,7 +25,7 @@ trait StableSortable
             return $callback($a['key'], $b['key']) ?: $a['position'] <=> $b['position'];
         });
 
-        $array = array_column($arrayAndPosition, 'key');
+        $array = array_combine(array_column($arrayAndPosition, 'key'), array_column($arrayAndPosition, 'value'));
     }
 
     public function usort(array &$array, callable $callback)
