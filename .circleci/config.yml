@@ -11,7 +11,7 @@ jobs:
       - checkout
 
       - run: sudo apt update 
-      - run: sudo docker-php-ext-install bcmath && sudo docker-php-ext-enable bcmath
+      - run: sudo apt install php-bcmath
 
       - restore_cache:
           keys:
