@@ -10,11 +10,11 @@ trait StableSortable
     {
         $arrayAndPosition = $this->getArrayWithPosition($array);
 
-        uasort($arrayAndPosition, function($a, $b) use($callback) {
+        usort($arrayAndPosition, function($a, $b) use($callback) {
             return $callback($a['value'], $b['value']) ?: $a['position'] <=> $b['position'];
         });
 
-        $array = array_column($arrayAndPosition, 'value');
+        $array = array_combine(array_column($arrayAndPosition, 'key'), array_column($arrayAndPosition, 'value'));
     }
 
     public function uksort(array &$array, callable $callback)
