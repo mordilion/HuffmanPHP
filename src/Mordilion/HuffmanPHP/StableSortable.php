@@ -21,11 +21,11 @@ trait StableSortable
     {
         $arrayAndPosition = $this->getArrayWithPosition($array);
 
-        uksort($arrayAndPosition, function($a, $b) use($callback) {
-            return $callback($a['value'], $b['value']) ?: $a['position'] <=> $b['position'];
+        usort($arrayAndPosition, function($a, $b) use($callback) {
+            return $callback($a['key'], $b['key']) ?: $a['position'] <=> $b['position'];
         });
 
-        $array = array_column($arrayAndPosition, 'value');
+        $array = array_column($arrayAndPosition, 'key');
     }
 
     public function usort(array &$array, callable $callback)
@@ -42,10 +42,10 @@ trait StableSortable
     private function getArrayWithPosition(array $array): array
     {
         $arrayAndPosition = [];
-        $pos = 0;
+        $position = 0;
 
-        foreach ($array as $value) {
-            $arrayAndPosition[] = ['value' => $value, 'position' => $pos++];
+        foreach ($array as $key => $value) {
+            $arrayAndPosition[] = ['key' => $key, 'value' => $value, 'position' => $position++];
         }
 
         return $arrayAndPosition;
