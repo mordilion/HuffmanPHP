@@ -1,11 +1,24 @@
 # PHP CircleCI 2.0 configuration file
 # See: https://circleci.com/docs/2.0/language-php/
-version: 2
+version: 2.1
 
+workflows:
+  main:
+    jobs:
+      - testing:
+        version: 7.4
+      - testing:
+        version: 8.0
+      - testing:
+        version: 8.1
+      
 jobs:
-  build:
+  testing:
+    parameters:
+      version:
+        type: string
     docker:
-      - image: cimg/php:7.4 #circleci/php:8.1-node-browsers
+      - image: cimg/php:<< parameters.version >> #circleci/php:8.1-node-browsers
 
     steps:
       - checkout
@@ -15,14 +28,15 @@ jobs:
 
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "composer.json" }}
-            - v1-dependencies-
+            - v1-dependencies-{{ checksum "composer.json" }}-<< parameters.version >>
+            - v1-dependencies-<< parameters.version >>
 
       - run: composer install -n --prefer-dist
 
       - save_cache:
-          key: v1-dependencies-{{ checksum "composer.json" }}
+          key: v1-dependencies-{{ checksum "composer.json" }}-<< parameters.version >>
           paths:
             - ./vendor
 
       - run: ./vendor/bin/phpunit
+      - run: ./vendor/bin/psalm
