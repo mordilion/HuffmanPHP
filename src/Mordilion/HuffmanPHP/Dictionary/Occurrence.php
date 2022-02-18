@@ -24,7 +24,7 @@ final class Occurrence
     private $count;
 
     /**
-     * @var array<string, string>
+     * @var array<string|int, string>
      */
     private $data;
 
@@ -84,6 +84,6 @@ final class Occurrence
      */
     public function setValue($value, string $binary): void
     {
-        $this->data[(string) $value] = $binary;
+        $this->data[$value] = $binary;
     }
 }
