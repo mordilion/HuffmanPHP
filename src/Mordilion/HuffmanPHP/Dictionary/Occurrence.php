@@ -84,6 +84,6 @@ final class Occurrence
      */
     public function setValue($value, string $binary): void
     {
-        $this->data[$value] = $binary;
+        $this->data[(string) $value] = $binary;
     }
 }
