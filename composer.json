@@ -12,7 +12,7 @@
     "require": {
         "php": ">=7.1 || >=8.0",
         "ext-bcmath": "*",
-        "mordilion/mutils": "^0.1.0"
+        "mordilion/mutils": "^0.1"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.0",
@@ -20,7 +20,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Mordilion\\HuffmanPHP\\": "src/Mordilion/HuffmanPHP"
+            "Mordilion\\HuffmanPHP\\": "src"
         }
     }
 }

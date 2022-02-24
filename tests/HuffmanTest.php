@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Mordilion\HuffmanPHP;
-
+use Mordilion\HuffmanPHP\Dictionary;
+use Mordilion\HuffmanPHP\Huffman;
 use PHPUnit\Framework\TestCase;
 
 /**

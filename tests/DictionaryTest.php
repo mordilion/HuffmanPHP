@@ -2,8 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Mordilion\HuffmanPHP;
-
+use Mordilion\HuffmanPHP\Dictionary;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -54,7 +53,6 @@ class DictionaryTest extends TestCase
     {
         $dictionary = new Dictionary(['aabc'], 1);
         $dictionaryValues = $dictionary->getValues();
-        var_dump($dictionaryValues);
 
         self::assertEquals('1', $dictionaryValues['a']);
         self::assertEquals('01', $dictionaryValues['b']);
