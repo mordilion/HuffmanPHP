@@ -68,8 +68,8 @@ class Huffman
             return '';
         }
 
-        if (isset($this->cache['decode'][$encoded])) {
-            return $this->cache['decode'][$encoded];
+        if (isset($this->cache['decode'][$encoded][$compressed])) {
+            return $this->cache['decode'][$encoded][$compressed];
         }
 
         $encodedOriginal = $encoded;
@@ -88,7 +88,7 @@ class Huffman
             $i += $inc;
         }
 
-        $this->cache['decode'][$encodedOriginal] = $decoded;
+        $this->cache['decode'][$encodedOriginal][$compressed] = $decoded;
 
         return $decoded;
     }
@@ -105,8 +105,8 @@ class Huffman
             return '';
         }
 
-        if (isset($this->cache['encode'][$decoded])) {
-            return $this->cache['encode'][$decoded];
+        if (isset($this->cache['encode'][$decoded][$compress])) {
+            return $this->cache['encode'][$decoded][$compress];
         }
 
         $encoded = '';
@@ -123,7 +123,7 @@ class Huffman
             return $this->convertBase('1' . $encoded, self::ALPHABET_BINARY, $this->compressAlphabet);
         }
 
-        $this->cache['encode'][$decoded] = $encoded;
+        $this->cache['encode'][$decoded][$compress] = $encoded;
 
         return $encoded;
     }

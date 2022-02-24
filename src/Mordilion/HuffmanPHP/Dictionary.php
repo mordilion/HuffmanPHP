@@ -15,14 +15,13 @@ namespace Mordilion\HuffmanPHP;
 
 use InvalidArgumentException;
 use Mordilion\HuffmanPHP\Dictionary\Occurrence;
+use MUtils\Sort;
 
 /**
  * @author Henning Huncke <mordilion@gmx.de>
  */
 class Dictionary
 {
-    use StableSortable;
-
     public const MAX_LENGTH_WHOLE_WORDS = 0;
 
     /**
@@ -225,11 +224,11 @@ class Dictionary
     {
         $this->valuesReversed = $this->values;
 
-        $this->uksort($this->values, static function ($left, $right) {
+        Sort\uksort($this->values, static function ($left, $right) {
             return strlen((string) $right) <=> strlen((string) $left);
         });
 
-        $this->uasort($this->valuesReversed, static function ($left, $right) {
+        Sort\uasort($this->valuesReversed, static function ($left, $right) {
             return strlen((string) $left) <=> strlen((string) $right);
         });
 
@@ -254,7 +253,7 @@ class Dictionary
      */
     private function sortByCountAndDepth(array &$occurrences): void
     {
-        $this->usort($occurrences, static function (Occurrence $left, Occurrence $right) {
+        Sort\usort($occurrences, static function (Occurrence $left, Occurrence $right) {
             $compare = $left->getCount() <=> $right->getCount();
 
             if ($compare !== 0) {

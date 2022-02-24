@@ -50,6 +50,17 @@ class DictionaryTest extends TestCase
         self::assertEquals('00', $dictionaryValues['c']);
     }
 
+    public function testDictionaryHasTheCorrectStableSortedValues()
+    {
+        $dictionary = new Dictionary(['aabc'], 1);
+        $dictionaryValues = $dictionary->getValues();
+        var_dump($dictionaryValues);
+
+        self::assertEquals('1', $dictionaryValues['a']);
+        self::assertEquals('01', $dictionaryValues['b']);
+        self::assertEquals('00', $dictionaryValues['c']);
+    }
+
     public function testDictionaryHasTheCorrectSortedValuesWithIntegerValues()
     {
         $dictionary = new Dictionary(['123412341567156718961896147258369877655554444433333322222221111'], 1);
