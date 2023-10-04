@@ -12,11 +12,11 @@
     "require": {
         "php": ">=7.1 || >=8.0",
         "ext-bcmath": "*",
-        "mordilion/mutils": "^1.0"
+        "mordilion/mutils": "^1.2"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.0",
-        "vimeo/psalm": "^3.8"
+        "phpunit/phpunit": "^9.6",
+        "vimeo/psalm": "^4.30"
     },
     "autoload": {
         "psr-4": {
