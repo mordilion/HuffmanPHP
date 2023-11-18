@@ -154,7 +154,7 @@ class Huffman
 
         while (gmp_cmp($decimal, 0) !== 0) {
             $result = $outputAlphabet[gmp_intval(gmp_mod($decimal, $outputAlphabetLength))] . $result;
-            $decimal = gmp_div($decimal, $outputAlphabetLength);
+            $decimal = gmp_div($decimal, (string) $outputAlphabetLength);
         }
 
         return $result;
