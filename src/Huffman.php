@@ -137,24 +137,24 @@ class Huffman
      */
     private function convertBase(string $input, string $inputAlphabet, string $outputAlphabet): string
     {
-        $inputAlphabetLength = (string) strlen($inputAlphabet);
-        $outputAlphabetLength = (string) strlen($outputAlphabet);
+        $inputAlphabetLength = strlen($inputAlphabet);
+        $outputAlphabetLength = strlen($outputAlphabet);
         $inputAlphabetFlipped = array_flip(str_split($inputAlphabet));
-        $decimal = '0';
+        $decimal = gmp_init(0, 10);
 
         foreach (str_split($input) as $char) {
-            $decimal = bcadd(bcmul($inputAlphabetLength, $decimal), (string) $inputAlphabetFlipped[$char]);
+            $decimal = gmp_add(gmp_mul($inputAlphabetLength, $decimal), $inputAlphabetFlipped[$char]);
         }
 
-        if ($decimal < $outputAlphabetLength) {
-            return $outputAlphabet[(int) $decimal];
+        if (gmp_cmp($decimal, $outputAlphabetLength) < 0) {
+            return $outputAlphabet[gmp_intval($decimal)];
         }
 
         $result = '';
 
-        while ($decimal !== '0') {
-            $result = $outputAlphabet[(int) bcmod($decimal, $outputAlphabetLength)] . $result;
-            $decimal = bcdiv($decimal, $outputAlphabetLength, 0);
+        while (gmp_cmp($decimal, 0) !== 0) {
+            $result = $outputAlphabet[gmp_intval(gmp_mod($decimal, $outputAlphabetLength))] . $result;
+            $decimal = gmp_div($decimal, $outputAlphabetLength);
         }
 
         return $result;
