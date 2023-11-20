@@ -11,6 +11,20 @@ declare(strict_types=1);
 
 namespace Mordilion\HuffmanPHP;
 
+define('BIG_NUMBERS_LIB_BCMATH', 'bcmath');
+define('BIG_NUMBERS_LIB_GMP', 'gmp');
+define('BIG_NUMBERS_LIB_NONE', 'none');
+define(
+    'BIG_NUMBERS_LIB_INSTALLED',
+    extension_loaded('gmp')
+        ? BIG_NUMBERS_LIB_GMP
+        : (
+            extension_loaded('bcmath')
+                ? BIG_NUMBERS_LIB_BCMATH
+                : BIG_NUMBERS_LIB_NONE
+        )
+);
+
 use RuntimeException;
 
 /**
@@ -129,35 +143,59 @@ class Huffman
     }
 
     /**
-     * @param string $input
-     * @param string $inputAlphabet
-     * @param string $outputAlphabet
+     * @param string $num
+     * @param string $fromBaseAlphabet
+     * @param string $toBaseAlphabet
      *
      * @return string
      */
-    private function convertBase(string $input, string $inputAlphabet, string $outputAlphabet): string
+    private function convertBase(string $num, string $fromBaseAlphabet, string $toBaseAlphabet): string
     {
-        $inputAlphabetLength = strlen($inputAlphabet);
-        $outputAlphabetLength = strlen($outputAlphabet);
-        $inputAlphabetFlipped = array_flip(str_split($inputAlphabet));
-        $decimal = gmp_init(0, 10);
+        $fromBaseAlphabetLength = strlen($fromBaseAlphabet);
+        $toBaseAlphabetLength = strlen($toBaseAlphabet);
+        $fromBaseAlphabetFlipped = array_flip(str_split($fromBaseAlphabet));
 
-        foreach (str_split($input) as $char) {
-            $decimal = gmp_add(gmp_mul($inputAlphabetLength, $decimal), $inputAlphabetFlipped[$char]);
+        if (BIG_NUMBERS_LIB_INSTALLED === BIG_NUMBERS_LIB_GMP) {
+            $decimal = gmp_init(0, 10);
+
+            foreach (str_split($num) as $char) {
+                $decimal = gmp_add(gmp_mul($fromBaseAlphabetLength, $decimal), (string) $fromBaseAlphabetFlipped[$char]);
+            }
+
+            if (gmp_cmp($decimal, $toBaseAlphabetLength) < 0) {
+                return $toBaseAlphabet[gmp_intval($decimal)];
+            }
+
+            $result = '';
+            while (gmp_cmp($decimal, 0) !== 0) {
+                $result = $toBaseAlphabet[gmp_intval(gmp_mod($decimal, $toBaseAlphabetLength))] . $result;
+                $decimal = gmp_div($decimal, (string) $toBaseAlphabetLength);
+            }
+
+            return $result;
         }
 
-        if (gmp_cmp($decimal, $outputAlphabetLength) < 0) {
-            return $outputAlphabet[gmp_intval($decimal)];
+        if (BIG_NUMBERS_LIB_INSTALLED === BIG_NUMBERS_LIB_BCMATH) {
+            $decimal = '0';
+
+            foreach (str_split($num) as $char) {
+                $decimal = bcadd(bcmul($fromBaseAlphabet, $decimal), (string) $fromBaseAlphabetFlipped[$char]);
+            }
+
+            if (bccomp($decimal, (string) $toBaseAlphabetLength) < 0) {
+                return $toBaseAlphabet[(int) $decimal];
+            }
+
+            $result = '';
+            while (bccomp($decimal, '0') !== 0) {
+                $result = $toBaseAlphabet[(int) bcmod($decimal, (string) $toBaseAlphabetLength)] . $result;
+                $decimal = bcdiv($decimal, (string) $toBaseAlphabetLength);
+            }
+
+            return $result;
         }
 
-        $result = '';
-
-        while (gmp_cmp($decimal, 0) !== 0) {
-            $result = $outputAlphabet[gmp_intval(gmp_mod($decimal, $outputAlphabetLength))] . $result;
-            $decimal = gmp_div($decimal, (string) $outputAlphabetLength);
-        }
-
-        return $result;
+        throw new RuntimeException('No library for big numbers (gmp or bcmath) loaded!');
     }
 
     /**

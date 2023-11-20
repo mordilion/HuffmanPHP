@@ -84,4 +84,3 @@ echo '    Min Time: ' . (min($times['decoding'])) . PHP_EOL;
 echo '    Max Time: ' . (max($times['decoding'])) . PHP_EOL;
 echo '    Median Time: ' . (getMedian($times['decoding'])) . PHP_EOL;
 echo memory_get_usage(true) . PHP_EOL;
-

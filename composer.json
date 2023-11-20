@@ -11,7 +11,6 @@
     ],
     "require": {
         "php": ">=7.1 || >=8.0",
-        "ext-gmp": "*",
         "mordilion/mutils": "^1.2"
     },
     "require-dev": {
