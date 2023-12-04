@@ -179,7 +179,7 @@ class Huffman
             $decimal = '0';
 
             foreach (str_split($num) as $char) {
-                $decimal = bcadd(bcmul($fromBaseAlphabet, $decimal), (string) $fromBaseAlphabetFlipped[$char]);
+                $decimal = bcadd(bcmul((string) $fromBaseAlphabetLength, $decimal), (string) $fromBaseAlphabetFlipped[$char]);
             }
 
             if (bccomp($decimal, (string) $toBaseAlphabetLength) < 0) {
