@@ -136,6 +136,19 @@ class Dictionary
             return;
         }
 
+        if (count($occurrences) === 1) {
+            $single = reset($occurrences);
+
+            foreach (array_keys($single->getData()) as $value) {
+                /**
+                 * @var $value string|int
+                 */
+                $this->values[$value] = '0';
+            }
+            
+            return;
+        }
+
         $this->sortByCountAndDepth($occurrences);
 
         while (count($occurrences) > 1) {
