@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use InvalidArgumentException;
 use Mordilion\HuffmanPHP\Dictionary;
 use PHPUnit\Framework\TestCase;
 
@@ -86,5 +87,109 @@ class DictionaryTest extends TestCase
         self::assertEquals('1101', $dictionaryValues['7']);
         self::assertEquals('10100', $dictionaryValues['8']);
         self::assertEquals('10101', $dictionaryValues['9']);
+    }
+
+    public function testSingleCharacterDictionaryAssignsBinaryCode(): void
+    {
+        $dictionary = new Dictionary(['aaa'], 1);
+        $dictionaryValues = $dictionary->getValues();
+
+        self::assertCount(1, $dictionaryValues);
+        self::assertEquals('0', $dictionaryValues['a']);
+    }
+
+    public function testEmptyArrayProducesEmptyDictionary(): void
+    {
+        $dictionary = new Dictionary([]);
+        $dictionaryValues = $dictionary->getValues();
+
+        self::assertEmpty($dictionaryValues);
+    }
+
+    public function testGetBinaryReturnsCorrectValueForKnownKey(): void
+    {
+        $dictionary = new Dictionary(['aaabbcc'], 1);
+
+        self::assertNotNull($dictionary->getBinary('a'));
+        self::assertNotNull($dictionary->getBinary('b'));
+        self::assertNotNull($dictionary->getBinary('c'));
+    }
+
+    public function testGetBinaryReturnsNullForUnknownKey(): void
+    {
+        $dictionary = new Dictionary(['aaabbcc'], 1);
+
+        self::assertNull($dictionary->getBinary('z'));
+    }
+
+    public function testGetValueReturnsCorrectKeyForKnownBinary(): void
+    {
+        $dictionary = new Dictionary(['aaabbcc'], 1);
+
+        $binaryA = $dictionary->getBinary('a');
+        self::assertNotNull($binaryA);
+        self::assertEquals('a', $dictionary->getValue($binaryA));
+    }
+
+    public function testGetValueReturnsFalseForUnknownBinary(): void
+    {
+        $dictionary = new Dictionary(['aaabbcc'], 1);
+
+        self::assertFalse($dictionary->getValue('11111111'));
+    }
+
+    public function testGetMinBinaryLengthReturnsCorrectValue(): void
+    {
+        $dictionary = new Dictionary(['aaabbcc'], 1);
+
+        // 'a' has the shortest binary code (most frequent)
+        $minLength = $dictionary->getMinBinaryLength();
+        self::assertIsInt($minLength);
+        self::assertGreaterThan(0, $minLength);
+
+        // minBinaryLength should match the shortest binary code
+        $values = $dictionary->getValues();
+        $shortestLength = PHP_INT_MAX;
+        foreach ($values as $binary) {
+            $shortestLength = min($shortestLength, strlen($binary));
+        }
+        self::assertEquals($shortestLength, $minLength);
+    }
+
+    public function testSetValuesReplacesAndPreparesValues(): void
+    {
+        $dictionary = new Dictionary(['aaabbcc'], 1);
+
+        $customValues = ['x' => '0', 'y' => '10', 'z' => '11'];
+        $dictionary->setValues($customValues);
+
+        self::assertEquals('0', $dictionary->getBinary('x'));
+        self::assertEquals('10', $dictionary->getBinary('y'));
+        self::assertEquals('11', $dictionary->getBinary('z'));
+        self::assertNull($dictionary->getBinary('a'));
+    }
+
+    public function testConstructorThrowsExceptionForNegativeMaxLength(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        new Dictionary(['test'], -1);
+    }
+
+    public function testMaxLengthWholeWordsIsAccepted(): void
+    {
+        $dictionary = new Dictionary(['hello', 'world'], Dictionary::MAX_LENGTH_WHOLE_WORDS);
+        $values = $dictionary->getValues();
+
+        self::assertArrayHasKey('hello', $values);
+        self::assertArrayHasKey('world', $values);
+    }
+
+    public function testGetMaxLengthReturnsConstructorValue(): void
+    {
+        $dictionary = new Dictionary(['test'], 5);
+        self::assertEquals(5, $dictionary->getMaxLength());
+
+        $dictionary = new Dictionary(['test'], Dictionary::MAX_LENGTH_WHOLE_WORDS);
+        self::assertEquals(Dictionary::MAX_LENGTH_WHOLE_WORDS, $dictionary->getMaxLength());
     }
 }

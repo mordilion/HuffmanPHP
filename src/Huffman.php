@@ -11,20 +11,6 @@ declare(strict_types=1);
 
 namespace Mordilion\HuffmanPHP;
 
-define('BIG_NUMBERS_LIB_BCMATH', 'bcmath');
-define('BIG_NUMBERS_LIB_GMP', 'gmp');
-define('BIG_NUMBERS_LIB_NONE', 'none');
-define(
-    'BIG_NUMBERS_LIB_INSTALLED',
-    extension_loaded('gmp')
-        ? BIG_NUMBERS_LIB_GMP
-        : (
-            extension_loaded('bcmath')
-                ? BIG_NUMBERS_LIB_BCMATH
-                : BIG_NUMBERS_LIB_NONE
-        )
-);
-
 use RuntimeException;
 
 /**
@@ -32,50 +18,35 @@ use RuntimeException;
  */
 class Huffman
 {
+    public const BIG_NUMBERS_LIB_BCMATH = 'bcmath';
+    public const BIG_NUMBERS_LIB_GMP = 'gmp';
+    public const BIG_NUMBERS_LIB_NONE = 'none';
+
+    private static ?string $bigNumbersLib = null;
+
     public const ALPHABET_BASE10 = '0123456789';
     public const ALPHABET_BASE16 = '0123456789ABCDEF';
     public const ALPHABET_BASE16_LOWER = '0123456789abcdef';
-    public const ALPHABET_BASE25 = 'ABCDEFGHIJKLMNOPQRSTUVWXY';
-    public const ALPHABET_BASE25_LOWER = 'abcdefghijklmnopqrstuvwxyz';
-    public const ALPHABET_BASE36 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXY';
+    public const ALPHABET_BASE26 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    public const ALPHABET_BASE26_LOWER = 'abcdefghijklmnopqrstuvwxyz';
+    public const ALPHABET_BASE36 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     public const ALPHABET_BASE36_LOWER = '0123456789abcdefghijklmnopqrstuvwxyz';
     public const ALPHABET_BASE62 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
     public const ALPHABET_BASE65 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_~'; // MAX URL-SAFE ALPHABET
     private const ALPHABET_BINARY = '01';
 
-    /**
-     * @var array
-     */
-    private $cache;
+    private array $cache = [];
 
-    /**
-     * @var string
-     */
-    private $compressAlphabet;
+    private string $compressAlphabet;
 
-    /**
-     * @var Dictionary
-     */
-    private $dictionary;
+    private Dictionary $dictionary;
 
-    /**
-     * Huffman constructor.
-     *
-     * @param Dictionary $dictionary
-     * @param string     $compressAlphabet
-     */
     public function __construct(Dictionary $dictionary, string $compressAlphabet = self::ALPHABET_BASE65)
     {
         $this->dictionary = $dictionary;
         $this->compressAlphabet = $compressAlphabet;
     }
 
-    /**
-     * @param string $encoded
-     * @param bool   $compressed
-     *
-     * @return string
-     */
     public function decode(string $encoded, bool $compressed = false): string
     {
         if ($encoded === '') {
@@ -107,12 +78,6 @@ class Huffman
         return $decoded;
     }
 
-    /**
-     * @param string $decoded
-     * @param bool   $compress
-     *
-     * @return string
-     */
     public function encode(string $decoded, bool $compress = false): string
     {
         if ($decoded === '') {
@@ -134,7 +99,7 @@ class Huffman
         }
 
         if ($compress) {
-            return $this->convertBase('1' . $encoded, self::ALPHABET_BINARY, $this->compressAlphabet);
+            $encoded = $this->convertBase('1' . $encoded, self::ALPHABET_BINARY, $this->compressAlphabet);
         }
 
         $this->cache['encode'][$decoded][$compress] = $encoded;
@@ -142,20 +107,30 @@ class Huffman
         return $encoded;
     }
 
-    /**
-     * @param string $num
-     * @param string $fromBaseAlphabet
-     * @param string $toBaseAlphabet
-     *
-     * @return string
-     */
+    private static function detectBigNumbersLib(): string
+    {
+        if (self::$bigNumbersLib === null) {
+            if (extension_loaded('gmp')) {
+                self::$bigNumbersLib = self::BIG_NUMBERS_LIB_GMP;
+            } elseif (extension_loaded('bcmath')) {
+                self::$bigNumbersLib = self::BIG_NUMBERS_LIB_BCMATH;
+            } else {
+                self::$bigNumbersLib = self::BIG_NUMBERS_LIB_NONE;
+            }
+        }
+
+        return self::$bigNumbersLib;
+    }
+
     private function convertBase(string $num, string $fromBaseAlphabet, string $toBaseAlphabet): string
     {
         $fromBaseAlphabetLength = strlen($fromBaseAlphabet);
         $toBaseAlphabetLength = strlen($toBaseAlphabet);
         $fromBaseAlphabetFlipped = array_flip(str_split($fromBaseAlphabet));
 
-        if (BIG_NUMBERS_LIB_INSTALLED === BIG_NUMBERS_LIB_GMP) {
+        $lib = self::detectBigNumbersLib();
+
+        if ($lib === self::BIG_NUMBERS_LIB_GMP) {
             $decimal = gmp_init(0, 10);
 
             foreach (str_split($num) as $char) {
@@ -175,7 +150,7 @@ class Huffman
             return $result;
         }
 
-        if (BIG_NUMBERS_LIB_INSTALLED === BIG_NUMBERS_LIB_BCMATH) {
+        if ($lib === self::BIG_NUMBERS_LIB_BCMATH) {
             $decimal = '0';
 
             foreach (str_split($num) as $char) {
@@ -198,12 +173,6 @@ class Huffman
         throw new RuntimeException('No library for big numbers (gmp or bcmath) loaded!');
     }
 
-    /**
-     * @param string $decoded
-     * @param int    $index
-     *
-     * @return array
-     */
     private function getBestBinary(string $decoded, int $index): array
     {
         foreach ($this->dictionary->getValues($decoded[$index]) as $key => $value) {
@@ -217,12 +186,6 @@ class Huffman
         throw new RuntimeException(sprintf('Unknown key for "%s"', substr($decoded, $index)));
     }
 
-    /**
-     * @param string $encoded
-     * @param int    $index
-     *
-     * @return array
-     */
     private function getBestValue(string $encoded, int $index): array
     {
         foreach ($this->dictionary->getValuesReversed(substr($encoded, $index, $this->dictionary->getMinBinaryLength())) as $key => $value) {
