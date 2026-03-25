@@ -28,6 +28,7 @@ class Dictionary
 
     private int $minBinaryLength = PHP_INT_MAX;
 
+    /** @var array<string|int, string> */
     private array $values = [];
 
     private array $valuesByCharacter = [];
