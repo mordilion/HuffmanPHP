@@ -36,7 +36,7 @@ class Huffman
     private const ALPHABET_BINARY = '01';
 
     /**
-     * @var array<string, array<string, array<bool, string>>>
+     * @var array<string, array<string, array<int, string>>>
      */ 
     private array $cache = [];
 

@@ -140,9 +140,7 @@ class Dictionary
             $single = reset($occurrences);
 
             foreach (array_keys($single->getData()) as $value) {
-                /**
-                 * @var $value string|int
-                 */
+                /** @var string|int $value */
                 $this->values[$value] = '0';
             }
             
