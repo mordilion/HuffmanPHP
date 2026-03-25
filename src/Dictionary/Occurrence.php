@@ -51,6 +51,7 @@ final class Occurrence
         return $this->count;
     }
 
+    /** @return array<string|int, string> */
     public function getData(): array
     {
         return $this->data;
