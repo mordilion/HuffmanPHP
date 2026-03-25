@@ -136,15 +136,6 @@ class Dictionary
             return;
         }
 
-        if (count($occurrences) === 1) {
-            $single = reset($occurrences);
-            foreach ($single->getData() as $value => $binary) {
-                $this->values[$value] = '0';
-            }
-            
-            return;
-        }
-
         $this->sortByCountAndDepth($occurrences);
 
         while (count($occurrences) > 1) {
