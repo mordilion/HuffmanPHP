@@ -10,8 +10,7 @@
         }
     ],
     "require": {
-        "php": ">=8.1",
-        "mordilion/mutils": "^1.2"
+        "php": ">=8.1"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.6",
