@@ -18,20 +18,14 @@ namespace Mordilion\HuffmanPHP\Dictionary;
  */
 final class Occurrence
 {
-    /**
-     * @var int
-     */
-    private $count;
+    private int $count;
 
-    /**
-     * @var array<string|int, string>
+    /** 
+     * @var string[]
      */
-    private $data;
+    private array $data;
 
-    /**
-     * @var int
-     */
-    private $depth;
+    private int $depth;
 
     private function __construct(int $count, array $data, int $depth)
     {
@@ -59,11 +53,9 @@ final class Occurrence
         return $this->count;
     }
 
-    public function setCount(int $count): void
-    {
-        $this->count = $count;
-    }
-
+    /**
+     * @return string[]
+     */
     public function getData(): array
     {
         return $this->data;
@@ -74,15 +66,7 @@ final class Occurrence
         return $this->depth;
     }
 
-    public function setDepth(int $depth): void
-    {
-        $this->depth = $depth;
-    }
-
-    /**
-     * @param string|int $value
-     */
-    public function setValue($value, string $binary): void
+    public function setValue(string|int $value, string $binary): void
     {
         $this->data[$value] = $binary;
     }

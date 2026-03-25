@@ -24,52 +24,23 @@ class Dictionary
 {
     public const MAX_LENGTH_WHOLE_WORDS = 0;
 
-    /**
-     * @var int
-     */
-    private $maxLength;
+    private int $maxLength;
 
-    /**
-     * @var int
-     */
-    private $minBinaryLength = PHP_INT_MAX;
+    private int $minBinaryLength = PHP_INT_MAX;
 
-    /**
-     * @var Occurrence[]
+    /** 
+     * @var string[] 
      */
-    private $occurrences = [];
+    private array $values = [];
 
-    /**
-     * @var array
-     */
-    private $values = [];
+    private array $valuesByCharacter = [];
 
-    /**
-     * @var array
-     */
-    private $valuesByCharacter = [];
+    private array $valuesReversed = [];
 
-    /**
-     * @var array
-     */
-    private $valuesReversed = [];
+    private array $valuesReversedByCharacter = [];
 
-    /**
-     * @var array
-     */
-    private $valuesReversedByCharacter = [];
+    private array $valuesFlipped = [];
 
-    /**
-     * @var array
-     */
-    private $valuesFlipped = [];
-
-    /**
-     * Dictionary constructor.
-     *
-     * @param array $values
-     * @param int   $maxLength
-     */
     public function __construct(array $values, int $maxLength = 1)
     {
         if ($maxLength < self::MAX_LENGTH_WHOLE_WORDS) {
@@ -78,26 +49,17 @@ class Dictionary
 
         $this->maxLength = $maxLength;
 
-        $this->calculateOccurrences($values);
-        $this->buildDictionary($this->occurrences);
+        $occurrences = $this->calculateOccurrences($values);
+
+        $this->buildDictionary($occurrences);
         $this->prepareValues();
     }
 
-    /**
-     * @param string $key
-     *
-     * @return string|null
-     */
     public function getBinary(string $key): ?string
     {
         return $this->values[$key] ?? null;
     }
 
-    /**
-     * @param string|null $startCharacter
-     *
-     * @return array
-     */
     public function getValues(?string $startCharacter = null): array
     {
         if ($startCharacter === null) {
@@ -107,9 +69,6 @@ class Dictionary
         return $this->valuesByCharacter[$startCharacter] ?? $this->values;
     }
 
-    /**
-     * @return array
-     */
     public function getValuesReversed(?string $startCharacter = null): array
     {
         if ($startCharacter === null) {
@@ -119,35 +78,21 @@ class Dictionary
         return $this->valuesReversedByCharacter[$startCharacter] ?? $this->valuesReversed;
     }
 
-    /**
-     * @return int
-     */
     public function getMaxLength(): int
     {
         return $this->maxLength;
     }
 
-    /**
-     * @return int
-     */
     public function getMinBinaryLength(): int
     {
         return $this->minBinaryLength;
     }
 
-    /**
-     * @param string $binary
-     *
-     * @return false|int|string
-     */
-    public function getValue(string $binary)
+    public function getValue(string $binary): string|int|false
     {
         return $this->valuesFlipped[$binary] ?? false;
     }
 
-    /**
-     * @param array $values
-     */
     public function setValues(array $values): void
     {
         $this->values = $values;
@@ -156,9 +101,9 @@ class Dictionary
     }
 
     /**
-     * @param array $values
+     * @return Occurrence[]
      */
-    private function calculateOccurrences(array $values): void
+    private function calculateOccurrences(array $values): array
     {
         /** @var Occurrence[] $occurrences */
         $occurrences = [];
@@ -182,15 +127,23 @@ class Dictionary
             }
         }
 
-        $this->occurrences = $occurrences;
+        return $occurrences;
     }
 
-    /**
-     * @param Occurrence[] $occurrences
-     */
     private function buildDictionary(array $occurrences): void
     {
         if (empty($occurrences)) {
+            return;
+        }
+
+        if (count($occurrences) === 1) {
+            $single = reset($occurrences);
+
+            foreach (array_keys($single->getData()) as $value) {
+                /** @var string|int $value */
+                $this->values[$value] = '0';
+            }
+            
             return;
         }
 
@@ -248,9 +201,6 @@ class Dictionary
         }
     }
 
-    /**
-     * @param array $occurrences
-     */
     private function sortByCountAndDepth(array &$occurrences): void
     {
         Arrays\usort($occurrences, static function (Occurrence $left, Occurrence $right) {
