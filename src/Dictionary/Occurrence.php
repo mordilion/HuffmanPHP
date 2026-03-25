@@ -20,7 +20,9 @@ final class Occurrence
 {
     private int $count;
 
-    /** @var array<string|int, string> */
+    /** 
+     * @var string[]
+     */
     private array $data;
 
     private int $depth;
@@ -51,7 +53,9 @@ final class Occurrence
         return $this->count;
     }
 
-    /** @return array<string|int, string> */
+    /**
+     * @return string[]
+     */
     public function getData(): array
     {
         return $this->data;

@@ -35,6 +35,9 @@ class Huffman
     public const ALPHABET_BASE65 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_~'; // MAX URL-SAFE ALPHABET
     private const ALPHABET_BINARY = '01';
 
+    /**
+     * @var string[]
+     */ 
     private array $cache = [];
 
     private string $compressAlphabet;

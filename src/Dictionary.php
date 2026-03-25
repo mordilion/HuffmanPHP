@@ -28,7 +28,9 @@ class Dictionary
 
     private int $minBinaryLength = PHP_INT_MAX;
 
-    /** @var array<string|int, string> */
+    /** 
+     * @var string[] 
+     */
     private array $values = [];
 
     private array $valuesByCharacter = [];
@@ -48,6 +50,7 @@ class Dictionary
         $this->maxLength = $maxLength;
 
         $occurrences = $this->calculateOccurrences($values);
+
         $this->buildDictionary($occurrences);
         $this->prepareValues();
     }
@@ -135,9 +138,10 @@ class Dictionary
 
         if (count($occurrences) === 1) {
             $single = reset($occurrences);
-            foreach (array_keys($single->getData()) as $value) {
+            foreach ($single->getData() as $value => $binary) {
                 $this->values[$value] = '0';
             }
+            
             return;
         }
 
